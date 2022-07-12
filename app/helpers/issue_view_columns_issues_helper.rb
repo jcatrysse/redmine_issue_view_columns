@@ -57,7 +57,6 @@ module IssueViewColumnsIssuesHelper
 
     # set header with columns names
     s << content_tag('th style="text-align:left"', l(:field_subject))
-    s << content_tag('th style="text-align:center"', l(:field_status))
 
     columns_list.each do |column|
       next if column.caption == "Status"
