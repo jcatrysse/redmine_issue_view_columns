@@ -18,14 +18,14 @@ Basic functionality
 Compatibility
 -------------
 
-Plugin is compatible with Redmine 3.4.x and 4.0.x on MariaDB 10.3.14. Newer versions might work but these haven't been tested so far.
+Plugin is compatible with Redmine 5.0.x on MySQL 8.x.x. Newer or older versions may work but have not been tested yet.
 
 Installation
 ------------
 
-* Clone https://github.com/kenan3008/redmine_issue_view_columns or download zip to **redmine_dir/plugins/** folder
+* Clone https://github.com/san199332/redmine_issue_view_columns or download zip to **redmine_dir/plugins/** folder
 ```
-$ git clone https://github.com/kenan3008/redmine_issue_view_columns.git
+$ git clone https://github.com/san199332/redmine_issue_view_columns.git
 ```
 * From redmine root directory, run:
 ```
