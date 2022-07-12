@@ -11,13 +11,13 @@ module IssueViewColumnsIssuesHelper
     s = '<table class="list issues odd-even">'
 
     # set header - columns names
-    s << content_tag('th style="text-align:left"', l(:field_subject))
+    s << content_tag("th", l(:field_subject), style: "text-align:left")
     columns_list.each do |column|
       s << content_tag("th", column.caption)
     end
 
     if (Redmine::VERSION::MAJOR >= 4)
-      s << content_tag('th style="text-align:right"', l(:label_actions))
+      s << content_tag("th", l(:label_actions), style: "text-align:right")
     end
 
     # set data
@@ -56,14 +56,13 @@ module IssueViewColumnsIssuesHelper
     s = '<table class="list issues odd-even">'
 
     # set header with columns names
-    s << content_tag('th style="text-align:left"', l(:field_subject))
+    s << content_tag("th", l(:field_subject), style: "text-align:left")
 
     columns_list.each do |column|
-      next if column.caption == "Status"
       s << content_tag("th", column.caption)
     end
 
-    s << content_tag('th style="text-align:right"', l(:label_actions))
+    s << content_tag("th", l(:label_actions), style: "text-align:right")
 
     relations.each do |relation|
       other_issue = relation.other_issue(issue)
@@ -77,11 +76,9 @@ module IssueViewColumnsIssuesHelper
                                         class: "icon-only icon-link-break") : ""
 
       field_content = content_tag("td", check_box_tag("ids[]", other_issue.id, false, id: nil), class: "checkbox") +
-                      content_tag("td", relation.to_s(@issue) { |other| link_to_issue(other, project: Setting.cross_project_issue_relations?) }.html_safe, class: "subject", style: "width: 30%") +
-                      content_tag("td", other_issue.status, class: "status")
+                      content_tag("td", relation.to_s(@issue) { |other| link_to_issue(other, project: Setting.cross_project_issue_relations?) }.html_safe, class: "subject", style: "width: 30%")
 
       columns_list.each do |column|
-        next if column.name == :status
         field_content << content_tag("td", column_content(column, other_issue), class: "#{column.css_classes}")
       end
 
