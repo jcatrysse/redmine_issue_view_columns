@@ -26,7 +26,7 @@ module IssueViewColumnsIssuesHelper
       css << " idnt idnt-#{level}" if level > 0
 
       field_content = content_tag("td", check_box_tag("ids[]", child.id, false, id: nil), class: "checkbox") +
-                      content_tag("td", link_to_issue(child, project: (issue.project_id != child.project_id)), class: "subject", style: "width: 30%;white-space: nowrap;")
+                      content_tag("td", link_to_issue(child, project: (issue.project_id != child.project_id)), class: "subject", style: "width: 30%;")
 
       columns_list.each do |column|
         field_content << content_tag("td", column_content(column, child), class: "#{column.css_classes}")
