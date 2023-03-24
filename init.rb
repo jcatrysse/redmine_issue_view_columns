@@ -1,5 +1,3 @@
-require_dependency "issue_view_columns/project_helper_patch"
-
 Redmine::Plugin.register :redmine_issue_view_columns do
   name "Redmine Issue View Columns"
   author "Kenan Dervišević"
@@ -11,6 +9,17 @@ Redmine::Plugin.register :redmine_issue_view_columns do
     permission :manage_issue_view_columns, { issue_view_columns: :index }, { require: :member }
   end
   settings default: { "empty": true }, partial: "settings/issue_view_columns_settings"
+end
+
+if Rails::VERSION::MAJOR >= 5
+  version = "#{Rails::VERSION::MAJOR}.#{Rails::VERSION::MINOR}".to_f
+  preparation_class = ActiveSupport::Reloader
+else
+  preparation_class = ActionDispatch::Callbacks
+end
+
+preparation_class.to_prepare do
+  require_dependency 'issue_view_columns/project_helper_patch'
 end
 
 # helper methods needed for the Settings page of the project also
