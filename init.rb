@@ -20,6 +20,7 @@ end
 
 preparation_class.to_prepare do
   require_dependency 'issue_view_columns/project_helper_patch'
+  require_dependency 'issue_view_columns/issue_details_hooks'
 end
 
 # helper methods needed for the Settings page of the project also
