@@ -11,18 +11,8 @@ Redmine::Plugin.register :redmine_issue_view_columns do
   settings default: { "empty": true }, partial: "settings/issue_view_columns_settings"
 end
 
-if Rails::VERSION::MAJOR >= 5
-  version = "#{Rails::VERSION::MAJOR}.#{Rails::VERSION::MINOR}".to_f
-  preparation_class = ActiveSupport::Reloader
-else
-  preparation_class = ActionDispatch::Callbacks
-end
+require File.dirname(__FILE__) + '/lib/issue_view_columns_project_settings_tab'
+require File.dirname(__FILE__) + '/lib/issue_details_hooks'
 
-preparation_class.to_prepare do
-  require_dependency 'issue_view_columns/project_helper_patch'
-  require_dependency 'issue_view_columns/issue_details_hooks'
-end
-
-# helper methods needed for the Settings page of the project also
 ProjectsController.send :helper, IssueViewColumnsHelper
 IssuesController.send :helper, IssueViewColumnsIssuesHelper
