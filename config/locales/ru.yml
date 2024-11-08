@@ -1,0 +1,5 @@
+ru:
+  label_select_columns: "Выбрать столбцы для подзадач и связанных задач"
+  issue_view_columns_settings: "Столбцы задачи"
+  label_issue_columns_created_sucessfully: "Столбцы успешно обновлены"
+  label_actions: "Действие"
