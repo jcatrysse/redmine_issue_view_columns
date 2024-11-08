@@ -24,6 +24,7 @@ module IssueViewColumnsIssuesHelper
     issue_list(issue.descendants.visible.preload(:status, :priority, :tracker, :assigned_to).sort_by(&:lft)) do |child, level|
       css = "issue issue-#{child.id} hascontextmenu #{child.css_classes}"
       css << " idnt idnt-#{level}" if level > 0
+      css << cycle(" odd", " even")
 
       field_content = content_tag("td", check_box_tag("ids[]", child.id, false, id: nil), class: "checkbox") +
                       content_tag("td", link_to_issue(child, project: (issue.project_id != child.project_id)), class: "subject", style: "width: 30%")
