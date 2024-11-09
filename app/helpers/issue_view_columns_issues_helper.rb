@@ -100,6 +100,7 @@ module IssueViewColumnsIssuesHelper
     relations.each do |relation|
       other_issue = relation.other_issue(issue)
       css = "issue hascontextmenu #{other_issue.css_classes}"
+      css << cycle(" odd", " even")
       link = manage_relations ? link_to(l(:label_relation_delete),
                                         relation_path(relation),
                                         remote: true,
