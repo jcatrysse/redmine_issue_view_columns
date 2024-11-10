@@ -1,4 +1,5 @@
 require_dependency File.dirname(__FILE__) + "/lib/issue_view_columns/project_helper_patch.rb"
+require_dependency File.dirname(__FILE__) + "/lib/issue_view_columns/view_issues_show_hook.rb"
 
 Redmine::Plugin.register :redmine_issue_view_columns do
   name "Redmine Issue View Columns"
