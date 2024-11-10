@@ -9,24 +9,39 @@ module IssueViewColumnsIssuesHelper
     # continue here if there are fields defined
     field_values = ""
     s = '<table class="list issues odd-even">'
-
+    sh = '<thead>'
     # set header - columns names
-    s << content_tag("th", l(:field_subject), style: "text-align:left")
+
+    if respond_to?(:check_box_tag)
+      sh << content_tag(:th, class: "checkbox hide-when-print") do
+        check_box_tag('check_all', '', false, class: 'toggle-selection',
+                      title: "#{l(:button_check_all)} / #{l(:button_uncheck_all)}")
+      end
+    else
+      # If `check_box_tag` unavailable, create HTML manually
+      sh << '<th class="checkbox hide-when-print">' \
+        '<input type="checkbox" name="check_all" class="toggle-selection" ' \
+        "title=\"#{I18n.t(:button_check_all)} / #{I18n.t(:button_uncheck_all)}\">" \
+        '</th>'
+    end
+
+    sh << content_tag("th", l(:field_subject), style: "text-align:left")
     columns_list.each do |column|
-      s << content_tag("th", column.caption)
+      sh << content_tag("th", column.caption)
     end
 
     if (Redmine::VERSION::MAJOR >= 4)
-      s << content_tag("th", l(:label_actions), style: "text-align:right")
+      sh << content_tag("th", l(:label_actions), style: "text-align:right")
     end
-
+    sh << '</thead>'
+    s << sh
     # set data
     issue_list(issue.descendants.visible.preload(:status, :priority, :tracker, :assigned_to).sort_by(&:lft)) do |child, level|
       css = "issue issue-#{child.id} hascontextmenu #{child.css_classes}"
       css << " idnt idnt-#{level}" if level > 0
 
       field_content = content_tag("td", check_box_tag("ids[]", child.id, false, id: nil), class: "checkbox") +
-                      content_tag("td", link_to_issue(child, project: (issue.project_id != child.project_id)), class: "subject", style: "width: 30%")
+        content_tag("td", link_to_issue(child, project: (issue.project_id != child.project_id)), class: "subject", style: "width: 30%")
 
       columns_list.each do |column|
         field_content << content_tag("td", column_content(column, child), class: "#{column.css_classes}")
@@ -54,15 +69,32 @@ module IssueViewColumnsIssuesHelper
     manage_relations = User.current.allowed_to?(:manage_issue_relations, issue.project)
 
     s = '<table class="list issues odd-even">'
+    sh = '<thead>'
+    # set header - columns names
 
-    # set header with columns names
-    s << content_tag("th", l(:field_subject), style: "text-align:left")
-
-    columns_list.each do |column|
-      s << content_tag("th", column.caption)
+    if respond_to?(:check_box_tag)
+      sh << content_tag(:th, class: "checkbox hide-when-print") do
+        check_box_tag('check_all', '', false, class: 'toggle-selection',
+                      title: "#{l(:button_check_all)} / #{l(:button_uncheck_all)}")
+      end
+    else
+      # If `check_box_tag` unavailable, create HTML manually
+      sh << '<th class="checkbox hide-when-print">' \
+        '<input type="checkbox" name="check_all" class="toggle-selection" ' \
+        "title=\"#{I18n.t(:button_check_all)} / #{I18n.t(:button_uncheck_all)}\">" \
+        '</th>'
     end
 
-    s << content_tag("th", l(:label_actions), style: "text-align:right")
+    sh << content_tag("th", l(:field_subject), style: "text-align:left")
+    columns_list.each do |column|
+      sh << content_tag("th", column.caption)
+    end
+
+    if (Redmine::VERSION::MAJOR >= 4)
+      sh << content_tag("th", l(:label_actions), style: "text-align:right")
+    end
+    sh << '</thead>'
+    s << sh
 
     relations.each do |relation|
       other_issue = relation.other_issue(issue)
@@ -76,7 +108,7 @@ module IssueViewColumnsIssuesHelper
                                         class: "icon-only icon-link-break") : ""
 
       field_content = content_tag("td", check_box_tag("ids[]", other_issue.id, false, id: nil), class: "checkbox") +
-                      content_tag("td", relation.to_s(@issue) { |other| link_to_issue(other, project: Setting.cross_project_issue_relations?) }.html_safe, class: "subject", style: "width: 30%")
+        content_tag("td", relation.to_s(@issue) { |other| link_to_issue(other, project: Setting.cross_project_issue_relations?) }.html_safe, class: "subject", style: "width: 30%")
 
       columns_list.each do |column|
         field_content << content_tag("td", column_content(column, other_issue), class: "#{column.css_classes}")
