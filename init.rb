@@ -21,3 +21,4 @@ end
 # helper methods needed for the Settings page of the project also
 ProjectsController.send :helper, IssueViewColumnsHelper
 IssuesController.send :helper, IssueViewColumnsIssuesHelper
+IssueRelationsController.send :helper, IssueViewColumnsIssuesHelper

@@ -8,33 +8,26 @@ module IssueViewColumnsIssuesHelper
 
     # continue here if there are fields defined
     field_values = ""
-    s = '<table class="list issues odd-even">'
-    sh = '<thead>'
-    # set header - columns names
+    s = +'<table class="list issues odd-even">'
+    headers = []
 
     if respond_to?(:check_box_tag)
-      sh << content_tag(:th, class: "checkbox hide-when-print") do
-        check_box_tag('check_all', '', false, class: 'toggle-selection',
-                      title: "#{l(:button_check_all)} / #{l(:button_uncheck_all)}")
-      end
+      headers << content_tag(:th, check_box_tag('check_all', '', false,
+                                             class: 'toggle-selection',
+                                             title: "#{l(:button_check_all)} / #{l(:button_uncheck_all)}"),
+                             class: 'checkbox hide-when-print')
     else
-      # If `check_box_tag` unavailable, create HTML manually
-      sh << '<th class="checkbox hide-when-print">' \
-        '<input type="checkbox" name="check_all" class="toggle-selection" ' \
-        "title=\"#{I18n.t(:button_check_all)} / #{I18n.t(:button_uncheck_all)}\">" \
-        '</th>'
+      headers << '<th class="checkbox hide-when-print"><input type="checkbox" name="check_all" class="toggle-selection" '
+                  "title=\"#{I18n.t(:button_check_all)} / #{I18n.t(:button_uncheck_all)}\"></th>"
     end
 
-    sh << content_tag("th", l(:field_subject), style: "text-align:left")
+    headers << content_tag(:th, l(:field_subject), style: 'text-align:left')
     columns_list.each do |column|
-      sh << content_tag("th", column.caption)
+      headers << content_tag(:th, column.caption, style: 'text-align:left')
     end
+    headers << content_tag(:th, l(:label_actions), style: 'text-align:right') if Redmine::VERSION::MAJOR >= 4
 
-    if (Redmine::VERSION::MAJOR >= 4)
-      sh << content_tag("th", l(:label_actions), style: "text-align:right")
-    end
-    sh << '</thead>'
-    s << sh
+    s << content_tag(:thead, content_tag(:tr, safe_join(headers)))
     # set data
     issue_list(issue.descendants.visible.preload(:status, :priority, :tracker, :assigned_to).sort_by(&:lft)) do |child, level|
       css = "issue issue-#{child.id} hascontextmenu #{child.css_classes}"
@@ -42,10 +35,10 @@ module IssueViewColumnsIssuesHelper
       css << cycle(" odd", " even")
 
       field_content = content_tag("td", check_box_tag("ids[]", child.id, false, id: nil), class: "checkbox") +
-        content_tag("td", link_to_issue(child, project: (issue.project_id != child.project_id)), class: "subject", style: "width: 30%")
+        content_tag("td", link_to_issue(child, project: (issue.project_id != child.project_id)), class: "subject", style: "width: 30%; text-align:left")
 
       columns_list.each do |column|
-        field_content << content_tag("td", column_content(column, child), class: "#{column.css_classes}")
+        field_content << content_tag("td", column_content(column, child), class: "#{column.css_classes}", style: "text-align:left")
       end
 
       if (Redmine::VERSION::MAJOR >= 4)
@@ -69,40 +62,33 @@ module IssueViewColumnsIssuesHelper
 
     manage_relations = User.current.allowed_to?(:manage_issue_relations, issue.project)
 
-    s = '<table class="list issues odd-even">'
-    sh = '<thead>'
-    # set header - columns names
+    s = +'<table class="list issues odd-even">'
+    headers = []
 
     if respond_to?(:check_box_tag)
-      sh << content_tag(:th, class: "checkbox hide-when-print") do
-        check_box_tag('check_all', '', false, class: 'toggle-selection',
-                      title: "#{l(:button_check_all)} / #{l(:button_uncheck_all)}")
-      end
+      headers << content_tag(:th, check_box_tag('check_all', '', false,
+                                             class: 'toggle-selection',
+                                             title: "#{l(:button_check_all)} / #{l(:button_uncheck_all)}"),
+                             class: 'checkbox hide-when-print')
     else
-      # If `check_box_tag` unavailable, create HTML manually
-      sh << '<th class="checkbox hide-when-print">' \
-        '<input type="checkbox" name="check_all" class="toggle-selection" ' \
-        "title=\"#{I18n.t(:button_check_all)} / #{I18n.t(:button_uncheck_all)}\">" \
-        '</th>'
+      headers << '<th class="checkbox hide-when-print"><input type="checkbox" name="check_all" class="toggle-selection" '
+                  "title=\"#{I18n.t(:button_check_all)} / #{I18n.t(:button_uncheck_all)}\"></th>"
     end
 
-    sh << content_tag("th", l(:field_subject), style: "text-align:left")
+    headers << content_tag(:th, l(:field_subject), style: 'text-align:left')
     columns_list.each do |column|
-      sh << content_tag("th", column.caption)
+      headers << content_tag(:th, column.caption, style: 'text-align:left')
     end
+    headers << content_tag(:th, l(:label_actions), style: 'text-align:right') if Redmine::VERSION::MAJOR >= 4
 
-    if (Redmine::VERSION::MAJOR >= 4)
-      sh << content_tag("th", l(:label_actions), style: "text-align:right")
-    end
-    sh << '</thead>'
-    s << sh
+    s << content_tag(:thead, content_tag(:tr, safe_join(headers)))
 
     relations.each do |relation|
       other_issue = relation.other_issue(issue)
-      css = "issue hascontextmenu #{other_issue.css_classes}"
+      css = "issue hascontextmenu #{other_issue.css_classes} #{relation.css_classes_for(other_issue)}"
       css << cycle(" odd", " even")
       link = manage_relations ? link_to(l(:label_relation_delete),
-                                        relation_path(relation),
+                                        relation_path(relation, issue_id: issue.id),
                                         remote: true,
                                         method: :delete,
                                         data: { confirm: l(:text_are_you_sure) },
@@ -110,10 +96,10 @@ module IssueViewColumnsIssuesHelper
                                         class: "icon-only icon-link-break") : ""
 
       field_content = content_tag("td", check_box_tag("ids[]", other_issue.id, false, id: nil), class: "checkbox") +
-        content_tag("td", relation.to_s(@issue) { |other| link_to_issue(other, project: Setting.cross_project_issue_relations?) }.html_safe, class: "subject", style: "width: 30%")
+        content_tag("td", relation.to_s(@issue) { |other| link_to_issue(other, project: Setting.cross_project_issue_relations?) }.html_safe, class: "subject", style: "width: 30%; text-align:left")
 
       columns_list.each do |column|
-        field_content << content_tag("td", column_content(column, other_issue), class: "#{column.css_classes}")
+        field_content << content_tag("td", column_content(column, other_issue), class: "#{column.css_classes}", style: "text-align:left")
       end
 
       buttons = link
