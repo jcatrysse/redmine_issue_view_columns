@@ -3,3 +3,7 @@ bs:
   issue_view_columns_settings: "Kolone tiketa"
   label_issue_columns_created_sucessfully: "Kolone uspješno ažurirane"
   label_actions: "Akcija"
+  label_issue_view_columns_relations_limit: "Maksimalan broj prikazanih povezanih tiketa"
+  label_issue_view_columns_relations_limit_hint: "Ostavite prazno ili postavite na 0 da prikažete sve povezane tikete."
+  label_issue_view_columns_show_more_relations: "Prikaži sve povezane tikete"
+  label_issue_view_columns_show_less_relations: "Prikaži manje povezanih tiketa"

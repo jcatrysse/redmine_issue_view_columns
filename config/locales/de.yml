@@ -3,3 +3,7 @@ de:
   issue_view_columns_settings: "Ausgabespalten"
   label_issue_columns_created_sucessfully: "Spalten erfolgreich aktualisiert"
   label_actions: "Aktion"
+  label_issue_view_columns_relations_limit: "Maximale Anzahl angezeigter verknüpfter Tickets"
+  label_issue_view_columns_relations_limit_hint: "Leer lassen oder 0, um alle verknüpften Tickets anzuzeigen."
+  label_issue_view_columns_show_more_relations: "Alle verknüpften Tickets anzeigen"
+  label_issue_view_columns_show_less_relations: "Weniger verknüpfte Tickets anzeigen"

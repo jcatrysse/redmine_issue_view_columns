@@ -3,3 +3,7 @@ en:
   issue_view_columns_settings: "Issue columns"
   label_issue_columns_created_sucessfully: "Columns updated successfully"
   label_actions: "Action"
+  label_issue_view_columns_relations_limit: "Maximum related issues to display"
+  label_issue_view_columns_relations_limit_hint: "Leave blank or set to 0 to show all related issues."
+  label_issue_view_columns_show_more_relations: "Show all related issues"
+  label_issue_view_columns_show_less_relations: "Show fewer related issues"

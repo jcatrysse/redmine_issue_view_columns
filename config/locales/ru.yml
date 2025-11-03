@@ -3,3 +3,7 @@ ru:
   issue_view_columns_settings: "Столбцы задачи"
   label_issue_columns_created_sucessfully: "Столбцы успешно обновлены"
   label_actions: "Действие"
+  label_issue_view_columns_relations_limit: "Максимальное число отображаемых связанных задач"
+  label_issue_view_columns_relations_limit_hint: "Оставьте пустым или укажите 0, чтобы показывать все связанные задачи."
+  label_issue_view_columns_show_more_relations: "Показать все связанные задачи"
+  label_issue_view_columns_show_less_relations: "Показать меньше связанных задач"

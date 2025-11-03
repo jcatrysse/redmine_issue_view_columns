@@ -10,8 +10,18 @@
     display: table-cell !important;
 }
 
+.ivc-relations-wrapper .ivc-hidden {
+    display: none;
+}
+
+.ivc-relations-wrapper .ivc-relations-toggle {
+    margin-top: 0.5em;
+}
+
 @media screen and (max-width: 799px) {
     table.list.issues>tbody>tr:first-child {
         display: none;
     }
 }
+
+.ivc-hidden { display: none; }

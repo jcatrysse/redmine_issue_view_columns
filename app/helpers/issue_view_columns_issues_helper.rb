@@ -1,4 +1,5 @@
 module IssueViewColumnsIssuesHelper
+  include IssueViewColumnsHelper
   def render_descendants_tree(issue)
     columns_list = get_fields_for_project(issue)
     # no field defined, then use render from core redmine (or whatever by other plugins loaded before this)
@@ -112,7 +113,23 @@ module IssueViewColumnsIssuesHelper
     end
 
     s << "</table>"
-    s.html_safe
+    table_html = s.html_safe
+
+    limit = relations_display_limit_for(issue.project)
+    return table_html unless limit && relations.size > limit
+
+    toggle_button = content_tag(:button,
+                                l(:label_issue_view_columns_show_more_relations),
+                                type: 'button',
+                                class: 'ivc-relations-toggle',
+                                data: {
+                                  collapsed_label: l(:label_issue_view_columns_show_more_relations),
+                                  expanded_label: l(:label_issue_view_columns_show_less_relations)
+                                })
+
+    content_tag(:div, table_html + toggle_button,
+                class: 'ivc-relations-wrapper',
+                data: { limit: limit })
   end
 
   private

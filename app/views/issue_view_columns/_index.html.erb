@@ -8,6 +8,12 @@
     <%= render_query_columns_selection(build_query_for_project) %>
   </fieldset>
 
+  <div class="field">
+    <%= label_tag 'relations_limit', l(:label_issue_view_columns_relations_limit) %>
+    <%= number_field_tag 'relations_limit', project_relations_display_limit(@project), min: 0, class: 'relations-limit-input' %>
+    <em class="info"><%= l(:label_issue_view_columns_relations_limit_hint) %></em>
+  </div>
+
   <%= submit_tag t(:button_save) -%>
   <%= submit_tag t(:button_cancel) -%>
 <% end %>

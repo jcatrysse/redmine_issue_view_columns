@@ -8,6 +8,15 @@
             :name => 'settings[issue_view_default_columns]') %>
 </fieldset>
 
+<div class="field">
+  <%= label_tag 'settings_relations_display_limit', l(:label_issue_view_columns_relations_limit) %>
+  <%= number_field_tag 'settings[relations_display_limit]',
+                       Setting.plugin_redmine_issue_view_columns["relations_display_limit"],
+                       min: 0,
+                       class: 'relations-limit-input' %>
+  <em class="info"><%= l(:label_issue_view_columns_relations_limit_hint) %></em>
+</div>
+
 <style>
 .tabular.settings label {
     margin-left: 0px !important;
