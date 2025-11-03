@@ -13,6 +13,7 @@ Basic functionality
 * There is a possibility to define global configuration in admin area. Global configuration is then applied to all projects that don't have the plugin module activated.
 * Subject and tracker columns are not configurable by this plugin. This information is always shown, as this is the default behavior of these sections in Redmine
 * Related issues contain an icon that is used to remove the relation from corresponding ticket. This icon is always shown as the last column on the right side of the related issues table
+* Limit the number of related issues shown at once with a configurable "show more" toggle (global default and per-project overrides)
 * Same configuration is applied to both subtasks and related issues sections
 
 Compatibility
