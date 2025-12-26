@@ -1,0 +1,13 @@
+it:
+  label_select_columns: "Seleziona colonne per le sottoattività e le attività correlate"
+  issue_view_columns_settings: "Colonne delle attività"
+  label_issue_columns_created_sucessfully: "Colonne aggiornate correttamente"
+  label_actions: "Azione"
+  label_issue_view_columns_relations_limit: "Numero massimo di attività correlate da mostrare"
+  label_issue_view_columns_relations_limit_hint: "Lascia vuoto o imposta 0 per mostrare tutte le attività correlate."
+  label_issue_view_columns_show_more_relations: "Mostra tutte le attività correlate"
+  label_issue_view_columns_show_less_relations: "Mostra meno attività correlate"
+  label_issue_view_columns_group_relations_by_type: "Raggruppa le attività correlate per tipo di relazione"
+  label_issue_view_columns_group_relations_by_type_hint: "Aggiunge una riga di intestazione per ogni tipo di relazione nella tabella delle attività correlate."
+  label_relates_to_business: "Relazionato a (business)"
+  label_relates_to_technical: "Relazionato a (tecnico)"

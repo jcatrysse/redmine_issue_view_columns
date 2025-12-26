@@ -30,4 +30,26 @@ module IssueViewColumnsHelper
     project_limits = settings["project_relations_limits"] || {}
     project_limits[project.id.to_s]
   end
+
+  def relations_grouped_by_type_for(project)
+    settings = Setting.plugin_redmine_issue_view_columns || {}
+
+    if project.module_enabled?(:issue_view_columns)
+      project_grouping = project_relations_group_by_type(project)
+      return project_grouping unless project_grouping.nil?
+    end
+
+    ActiveModel::Type::Boolean.new.cast(settings["relations_group_by_type"])
+  end
+
+  def project_relations_group_by_type(project)
+    return nil unless project.module_enabled?(:issue_view_columns)
+
+    settings = Setting.plugin_redmine_issue_view_columns || {}
+    project_groupings = settings["project_relations_group_by_type"] || {}
+    value = project_groupings[project.id.to_s]
+    return nil if value.nil?
+
+    ActiveModel::Type::Boolean.new.cast(value)
+  end
 end

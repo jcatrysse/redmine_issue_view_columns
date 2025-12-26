@@ -9,6 +9,8 @@
 /test/tmp/
 /test/version_tmp/
 /tmp/
+/config/redmine_issue_view_columns.local.rb
+/config/redmine_issue_view_columns.local.yml
 
 # Used by dotenv library to load environment variables.
 # .env
@@ -32,7 +34,6 @@ build-iPhoneSimulator/
 ## Documentation cache and generated files:
 /.yardoc/
 /_yardoc/
-/doc/
 /rdoc/
 
 ## Environment normalization:

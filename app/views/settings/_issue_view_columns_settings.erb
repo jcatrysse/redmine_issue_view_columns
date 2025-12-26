@@ -17,6 +17,17 @@
   <em class="info"><%= l(:label_issue_view_columns_relations_limit_hint) %></em>
 </div>
 
+<div class="field">
+  <%= label_tag 'settings_relations_group_by_type', l(:label_issue_view_columns_group_relations_by_type) %>
+  <%= hidden_field_tag 'settings[relations_group_by_type]', '0' %>
+  <%= check_box_tag 'settings[relations_group_by_type]',
+                    '1',
+                    ActiveModel::Type::Boolean.new.cast(
+                      Setting.plugin_redmine_issue_view_columns["relations_group_by_type"]
+                    ) %>
+  <em class="info"><%= l(:label_issue_view_columns_group_relations_by_type_hint) %></em>
+</div>
+
 <style>
 .tabular.settings label {
     margin-left: 0px !important;

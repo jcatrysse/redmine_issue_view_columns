@@ -1,0 +1,34 @@
+# RelationTypes should be no more than 30 characters!
+
+custom_locales_path = File.join(__dir__, 'redmine_issue_view_columns.local.yml')
+I18n.load_path << custom_locales_path if File.exist?(custom_locales_path)
+
+RedmineIssueViewColumns::RelationTypes.register!(
+  {
+    "relates_business" => {
+      name: :label_relates_to_business,
+      sym_name: :label_relates_to_business,
+      order: 1.1,
+      sym: "relates_business"
+    },
+    "relates_technical" => {
+      name: :label_relates_to_technical,
+      sym_name: :label_relates_to_technical,
+      order: 1.2,
+      sym: "relates_technical"
+    },
+    "relates_to_wiki" => {
+      name: :label_relates_to_wiki,
+      sym_name: :label_related_from_wiki,
+      order: 1.3,
+      sym: "related_from_wiki"
+    },
+    "related_from_wiki" => {
+      name: :label_related_from_wiki,
+      sym_name: :label_relates_to_wiki,
+      order: 1.4,
+      sym: "relates_to_wiki"
+    }
+  },
+  relates_like: %w[relates_business relates_technical relates_to_wiki related_from_wiki]
+)

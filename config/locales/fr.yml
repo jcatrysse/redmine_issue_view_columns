@@ -1,0 +1,13 @@
+fr:
+  label_select_columns: "Sélectionner les colonnes pour les sous-tâches et les tâches liées"
+  issue_view_columns_settings: "Colonnes des tâches"
+  label_issue_columns_created_sucessfully: "Colonnes mises à jour avec succès"
+  label_actions: "Action"
+  label_issue_view_columns_relations_limit: "Nombre maximal de tâches liées à afficher"
+  label_issue_view_columns_relations_limit_hint: "Laissez vide ou mettez 0 pour afficher toutes les tâches liées."
+  label_issue_view_columns_show_more_relations: "Afficher toutes les tâches liées"
+  label_issue_view_columns_show_less_relations: "Afficher moins de tâches liées"
+  label_issue_view_columns_group_relations_by_type: "Regrouper les tâches liées par type de relation"
+  label_issue_view_columns_group_relations_by_type_hint: "Ajoute une ligne d’en-tête pour chaque type de relation dans le tableau des tâches liées."
+  label_relates_to_business: "Lié à (métier)"
+  label_relates_to_technical: "Lié à (technique)"

@@ -7,3 +7,7 @@ bs:
   label_issue_view_columns_relations_limit_hint: "Ostavite prazno ili postavite na 0 da prikažete sve povezane tikete."
   label_issue_view_columns_show_more_relations: "Prikaži sve povezane tikete"
   label_issue_view_columns_show_less_relations: "Prikaži manje povezanih tiketa"
+  label_issue_view_columns_group_relations_by_type: "Group related issues by relation type"
+  label_issue_view_columns_group_relations_by_type_hint: "Adds a header row for each relation type in the related issues table."
+  label_relates_to_business: "Relates to (business)"
+  label_relates_to_technical: "Relates to (technical)"

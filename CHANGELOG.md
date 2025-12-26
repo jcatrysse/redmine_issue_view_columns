@@ -1,5 +1,9 @@
 # Changelog
 
+# 2.0.0 - 2025-03-12 - Jan Catrysse
+- Added plugin-configured "relates-like" relation types with example labels.
+- Added global and per-project settings to group related issues by relation type.
+
 # 1.0.3 - 2025-10-24 - Jan Catrysse
 - Added a configurable limit for related issues with an inline toggle to reveal or hide extra rows.
 - Introduced global and per-project settings for the related issues limit.

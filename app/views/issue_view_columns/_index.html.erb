@@ -14,6 +14,13 @@
     <em class="info"><%= l(:label_issue_view_columns_relations_limit_hint) %></em>
   </div>
 
+  <div class="field">
+    <%= label_tag 'relations_group_by_type', l(:label_issue_view_columns_group_relations_by_type) %>
+    <%= hidden_field_tag 'relations_group_by_type', '0' %>
+    <%= check_box_tag 'relations_group_by_type', '1', relations_grouped_by_type_for(@project) %>
+    <em class="info"><%= l(:label_issue_view_columns_group_relations_by_type_hint) %></em>
+  </div>
+
   <%= submit_tag t(:button_save) -%>
   <%= submit_tag t(:button_cancel) -%>
 <% end %>

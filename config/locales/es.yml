@@ -1,0 +1,13 @@
+es:
+  label_select_columns: "Seleccionar columnas para subtareas y tareas relacionadas"
+  issue_view_columns_settings: "Columnas de tareas"
+  label_issue_columns_created_sucessfully: "Columnas actualizadas correctamente"
+  label_actions: "Acción"
+  label_issue_view_columns_relations_limit: "Máximo de tareas relacionadas para mostrar"
+  label_issue_view_columns_relations_limit_hint: "Deje vacío o 0 para mostrar todas las tareas relacionadas."
+  label_issue_view_columns_show_more_relations: "Mostrar todas las tareas relacionadas"
+  label_issue_view_columns_show_less_relations: "Mostrar menos tareas relacionadas"
+  label_issue_view_columns_group_relations_by_type: "Agrupar tareas relacionadas por tipo de relación"
+  label_issue_view_columns_group_relations_by_type_hint: "Añade una fila de encabezado para cada tipo de relación en la tabla de tareas relacionadas."
+  label_relates_to_business: "Relacionado con (negocio)"
+  label_relates_to_technical: "Relacionado con (técnico)"

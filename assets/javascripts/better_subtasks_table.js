@@ -19,7 +19,8 @@
     var SELECTORS = {
         WRAPPER: '.ivc-relations-wrapper',
         TOGGLE:  '.ivc-relations-toggle',
-        ROWS:    'table.list.issues tbody tr',
+        ROWS:    'table.list.issues tbody tr.ivc-relation-row',
+        GROUP_HEADERS: 'table.list.issues tbody tr.ivc-relation-group-header',
         AUTOSCROLL_TARGETS: '#issue_tree, #relations'
     };
 
@@ -60,6 +61,16 @@
 
     function toggleEl($wrap) {
         return $wrap.find(SELECTORS.TOGGLE);
+    }
+
+    function groupHeaders($wrap) {
+        return $wrap.find(SELECTORS.GROUP_HEADERS);
+    }
+
+    function relationRowsByType($wrap, relationType) {
+        return $wrap.find(SELECTORS.ROWS).filter(function () {
+            return String($(this).data('relationGroup')) === String(relationType);
+        });
     }
 
     function readLabel($toggle, which) {
@@ -123,7 +134,22 @@
         } else {
             $rows.removeClass(CLASSES.HIDDEN);
         }
+        updateGroupHeaders($wrap);
         updateToggle($wrap);
+    }
+
+    function updateGroupHeaders($wrap) {
+        var $headers = groupHeaders($wrap);
+        if (!$headers.length) return;
+
+        $headers.each(function () {
+            var $header = $(this);
+            var relType = $header.data('relationGroup');
+            if (!relType) return;
+            var $groupRows = relationRowsByType($wrap, relType);
+            var anyVisible = $groupRows.not('.' + CLASSES.HIDDEN).length > 0;
+            $header.toggle(anyVisible);
+        });
     }
 
     function updateToggle($wrap) {
@@ -163,6 +189,7 @@
         } else {
             $rows.removeClass(CLASSES.HIDDEN);
         }
+        updateGroupHeaders($wrap);
         updateToggle($wrap);
     }
 

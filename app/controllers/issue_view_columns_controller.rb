@@ -26,7 +26,9 @@ class IssueViewColumnsController < ApplicationController
 
     plugin_settings = Setting.plugin_redmine_issue_view_columns || {}
     project_limits = (plugin_settings["project_relations_limits"] || {}).dup
+    project_groupings = (plugin_settings["project_relations_group_by_type"] || {}).dup
     limit_param = params[:relations_limit].to_s
+    group_param = params[:relations_group_by_type].to_s
 
     if limit_param.present? && limit_param.to_i.positive?
       project_limits[@project.id.to_s] = limit_param.to_i
@@ -34,9 +36,21 @@ class IssueViewColumnsController < ApplicationController
       project_limits.delete(@project.id.to_s)
     end
 
-    plugin_settings = plugin_settings.merge("project_relations_limits" => project_limits)
+    if group_param.present?
+      project_groupings[@project.id.to_s] = group_param == "1"
+    else
+      project_groupings.delete(@project.id.to_s)
+    end
+
+    plugin_settings = plugin_settings.merge(
+      "project_relations_limits" => project_limits,
+      "project_relations_group_by_type" => project_groupings
+    )
     Setting.plugin_redmine_issue_view_columns = plugin_settings
 
-    redirect_to :back, notice: l(:label_issue_columns_created_sucessfully)
+    redirect_back(
+      fallback_location: url_for(controller: "issue_view_columns", action: "index", project_id: @project),
+      notice: l(:label_issue_columns_created_sucessfully)
+    )
   end
 end

@@ -84,32 +84,44 @@ module IssueViewColumnsIssuesHelper
 
     s << content_tag(:thead, content_tag(:tr, safe_join(headers)))
 
-    relations.each do |relation|
-      other_issue = relation.other_issue(issue)
-      css = "issue hascontextmenu #{other_issue.css_classes} #{relation.css_classes_for(other_issue)}"
-      css << cycle(" odd", " even")
-      link = manage_relations ? link_to(l(:label_relation_delete),
-                                        relation_path(relation, issue_id: issue.id),
-                                        remote: true,
-                                        method: :delete,
-                                        data: { confirm: l(:text_are_you_sure) },
-                                        title: l(:label_relation_delete),
-                                        class: "icon-only icon-link-break") : ""
-
-      field_content = content_tag("td", check_box_tag("ids[]", other_issue.id, false, id: nil), class: "checkbox") +
-        content_tag("td", relation.to_s(@issue) { |other| link_to_issue(other, project: Setting.cross_project_issue_relations?) }.html_safe, class: "subject", style: "width: 30%; text-align:left")
-
-      columns_list.each do |column|
-        field_content << content_tag("td", column_content(column, other_issue), class: "#{column.css_classes}", style: "text-align:left")
+    grouped = relations_grouped_by_type_for(issue.project)
+    relation_groups = grouped ? group_relations_by_type(issue, relations) : { nil => relations }
+    row_index = 0
+    relation_groups.each do |relation_type, group_relations|
+      if grouped
+        s << relation_group_header(relation_type, columns_list)
       end
 
-      buttons = link
-      buttons << link_to_context_menu if Redmine::VERSION::MAJOR >= 4
-      field_content << content_tag('td', buttons, {class: 'buttons', style: 'text-align: right'}, false)
+      group_relations.each do |relation|
+        other_issue = relation.other_issue(issue)
+        css = "issue hascontextmenu #{other_issue.css_classes} #{relation.css_classes_for(other_issue)}"
+        css << (row_index.even? ? " odd" : " even")
+        row_index += 1
+        link = manage_relations ? link_to(l(:label_relation_delete),
+                                          relation_path(relation, issue_id: issue.id),
+                                          remote: true,
+                                          method: :delete,
+                                          data: { confirm: l(:text_are_you_sure) },
+                                          title: l(:label_relation_delete),
+                                          class: "icon-only icon-link-break") : ""
 
-      s << content_tag("tr", field_content,
-                       id: "relation-#{relation.id}",
-                       class: css)
+        field_content = content_tag("td", check_box_tag("ids[]", other_issue.id, false, id: nil), class: "checkbox") +
+          content_tag("td", relation.to_s(@issue) { |other| link_to_issue(other, project: Setting.cross_project_issue_relations?) }.html_safe, class: "subject", style: "width: 30%; text-align:left")
+
+        columns_list.each do |column|
+          field_content << content_tag("td", column_content(column, other_issue), class: "#{column.css_classes}", style: "text-align:left")
+        end
+
+        buttons = link
+        buttons << link_to_context_menu if Redmine::VERSION::MAJOR >= 4
+        field_content << content_tag('td', buttons, {class: 'buttons', style: 'text-align: right'}, false)
+
+        row_classes = grouped ? "#{css} ivc-relation-row" : css
+        s << content_tag("tr", field_content,
+                         id: "relation-#{relation.id}",
+                         class: row_classes,
+                         data: (grouped ? { relation_group: relation_type } : nil))
+      end
     end
 
     s << "</table>"
@@ -133,6 +145,36 @@ module IssueViewColumnsIssuesHelper
   end
 
   private
+
+  UNKNOWN_RELATION_GROUP = "unknown".freeze
+
+  def group_relations_by_type(issue, relations)
+    relations.group_by do |relation|
+      relation.relation_type_for(issue) || relation.relation_type || UNKNOWN_RELATION_GROUP
+    end.sort_by do |relation_type, _group_relations|
+      type = IssueRelation::TYPES[relation_type]
+      type ? type[:order] : Float::INFINITY
+    end.to_h
+  end
+
+  def relation_group_header(relation_type, columns_list)
+    label_key = IssueRelation::TYPES.dig(relation_type, :name)
+    label = if label_key
+              l(label_key)
+            elsif relation_type.to_s == UNKNOWN_RELATION_GROUP
+              l(:label_unknown)
+            else
+              relation_type.to_s
+            end
+    columns_count = 2 + columns_list.count + (Redmine::VERSION::MAJOR >= 4 ? 1 : 0)
+
+    content_tag(
+      "tr",
+      content_tag("th", label, colspan: columns_count, class: "ivc-relation-group-title", scope: "row"),
+      class: "ivc-relation-group-header",
+      data: { relation_group: relation_type }
+    )
+  end
 
   def get_fields_for_project(issue)
     query = IssueQuery.new()
