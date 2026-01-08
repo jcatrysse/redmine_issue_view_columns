@@ -1,5 +1,9 @@
 # Changelog
 
+# 2.0.1 - 2025-03-13 - Jan Catrysse
+- Added UI-only filtering for extra relation types with per-project configuration in the admin matrix and project tab.
+- Kept standard Redmine relation types always visible in the "Add relation" dropdown.
+
 # 2.0.0 - 2025-03-12 - Jan Catrysse
 - Added plugin-configured "relates-like" relation types with example labels.
 - Added global and per-project settings to group related issues by relation type.

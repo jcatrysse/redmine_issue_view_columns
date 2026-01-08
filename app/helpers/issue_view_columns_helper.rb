@@ -52,4 +52,22 @@ module IssueViewColumnsHelper
 
     ActiveModel::Type::Boolean.new.cast(value)
   end
+
+  def ordered_relation_type_keys
+    IssueRelation::TYPES.keys.sort_by { |key| IssueRelation::TYPES[key][:order] }
+  end
+
+  def additional_relation_type_keys
+    base_types = RedmineIssueViewColumns::RelationTypes.base_type_keys
+    ordered_relation_type_keys.reject { |key| base_types.include?(key) }
+                             .sort_by { |key| RedmineIssueViewColumns::RelationTypes.sort_key(key) }
+  end
+
+  def project_relation_types_override(project)
+    RedmineIssueViewColumns::RelationTypeSettings.project_relation_types(project)
+  end
+
+  def project_relation_types_all?(project)
+    RedmineIssueViewColumns::RelationTypeSettings.project_relation_types_all?(project)
+  end
 end

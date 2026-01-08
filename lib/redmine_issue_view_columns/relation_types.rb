@@ -17,6 +17,17 @@ module RedmineIssueViewColumns
         relates_like_types.include?(relation_type.to_s)
       end
 
+      def base_type_keys
+        (@base_types || IssueRelation::TYPES).keys
+      end
+
+      def sort_key(relation_type)
+        type = IssueRelation::TYPES[relation_type] || {}
+        return [1, type[:ivc_order_index]] if type[:ivc_order_index]
+
+        [0, type[:order] || Float::INFINITY, relation_type.to_s]
+      end
+
       private
 
       def relates_like_types
@@ -42,7 +53,12 @@ module RedmineIssueViewColumns
       def register_types!(additional_types)
         @base_types ||= IssueRelation::TYPES
         @registered_types ||= {}
-        @registered_types.merge!(additional_types)
+        index_offset = @registered_types.length
+        additional_types.each_with_index do |(key, value), index|
+          entry = value.dup
+          entry[:ivc_order_index] ||= index_offset + index
+          @registered_types[key] = entry
+        end
         new_types = @base_types.merge(@registered_types).freeze
         IssueRelation.send(:remove_const, :TYPES)
         IssueRelation.const_set(:TYPES, new_types)

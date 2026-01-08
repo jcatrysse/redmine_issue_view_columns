@@ -15,6 +15,7 @@ Basic functionality
 * Related issues contain an icon that is used to remove the relation from corresponding ticket. This icon is always shown as the last column on the right side of the related issues table
 * Limit the number of related issues shown at once with a configurable "show more" toggle (global default and per-project overrides)
 * Group related issues by relation type with global and per-project configuration
+* Hide or show extra relation types (custom "relates-like" relations) in the "Add relation" dropdown with per-project configuration; standard Redmine relation types are always visible
 * Same configuration is applied to both subtasks and related issues sections
 * Extend the available relation types via the plugin initializer (see below)
 
@@ -52,6 +53,10 @@ Example:
 By default, no extra relation types are registered. To add or rename relation types, create a local config file at
 `config/redmine_issue_view_columns.local.rb` (see the example file below). For update-proof translations, load a
 separate locale file outside the plugin and keep labels in that YAML file instead of inline in the config.
+
+Once extra relation types are registered, you can hide or show them in the "Add relation" dropdown via the per-project
+matrix in the plugin settings (and the dedicated project settings tab). This filtering is UI-only and does not block
+relations created via the REST API or other means.
 
 Local config file
 -----------------

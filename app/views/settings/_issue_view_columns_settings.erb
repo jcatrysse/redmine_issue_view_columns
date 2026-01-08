@@ -1,5 +1,6 @@
 <%= stylesheet_link_tag 'issue_view_columns', plugin: "redmine_issue_view_columns", media: 'all'%>
 <%= javascript_include_tag(:'issue_view_default_columns', plugin: "redmine_issue_view_columns") %>
+<%= javascript_include_tag(:'relation_type_matrix', plugin: "redmine_issue_view_columns") %>
 
 <fieldset class="box">
   <legend>Select default columns for issue's subtasks and related issues:</legend>
@@ -28,6 +29,62 @@
   <em class="info"><%= l(:label_issue_view_columns_group_relations_by_type_hint) %></em>
 </div>
 
+<fieldset class="box">
+  <legend><%= l(:label_issue_view_columns_project_relation_types) %></legend>
+  <div class="field">
+    <% if additional_relation_type_keys.any? %>
+      <% projects = Project.order(:name).to_a %>
+      <% project_types = Setting.plugin_redmine_issue_view_columns.fetch("project_relation_types", {}) %>
+      <table class="list permissions ivc-relation-types-matrix">
+        <thead>
+          <tr>
+            <th><%= l(:label_project) %></th>
+            <th class="ivc-check-all"><%= l(:label_issue_view_columns_all_relations) %></th>
+            <% additional_relation_type_keys.each do |relation_type| %>
+              <% relation_label = IssueRelation::TYPES.dig(relation_type, :name) %>
+              <th><%= relation_label ? l(relation_label) : relation_type %></th>
+            <% end %>
+          </tr>
+        </thead>
+        <tbody>
+          <% project_all = Setting.plugin_redmine_issue_view_columns.fetch("project_relation_types_all", {}) %>
+          <% projects.each do |project| %>
+            <% selected_relation_types = Array(project_types[project.id.to_s]).reject(&:blank?).map(&:to_s) %>
+            <% all_relations = ActiveModel::Type::Boolean.new.cast(project_all[project.id.to_s]) %>
+            <tr>
+              <td><%= project.name %></td>
+              <td class="ivc-check-all">
+                <%= hidden_field_tag "settings[project_relation_types_all][#{project.id}]", '0' %>
+                <%= check_box_tag "settings[project_relation_types_all][#{project.id}]",
+                                  '1',
+                                  all_relations,
+                                  class: 'ivc-check-all-toggle',
+                                  data: {
+                                    target: "ivc-project-#{project.id}",
+                                    previous: selected_relation_types.join(",")
+                                  } %>
+              </td>
+              <%= hidden_field_tag "settings[project_relation_types][#{project.id}][]", '' %>
+              <% additional_relation_type_keys.each do |relation_type| %>
+                <td class="ivc-project-<%= project.id %>">
+                  <%= check_box_tag "settings[project_relation_types][#{project.id}][]",
+                                    relation_type,
+                                    selected_relation_types.include?(relation_type.to_s) || all_relations,
+                                    class: 'ivc-relation-checkbox' %>
+                </td>
+              <% end %>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    <% else %>
+      <em class="info"><%= l(:label_issue_view_columns_no_additional_relation_types) %></em>
+    <% end %>
+  </div>
+  <em class="info"><%= l(:label_issue_view_columns_relation_types_hint) %></em>
+  <em class="info"><%= l(:label_issue_view_columns_all_relations_hint) %></em>
+</fieldset>
+
 <style>
 .tabular.settings label {
     margin-left: 0px !important;
@@ -37,5 +94,39 @@
 .tabular label {
     text-align: right !important;
     float: none !important;
+}
+
+.ivc-relation-types-matrix th,
+.ivc-relation-types-matrix td {
+    text-align: center;
+    padding: 4px 6px;
+}
+
+.ivc-relation-types-matrix {
+    width: auto;
+    table-layout: auto;
+    border-collapse: collapse;
+    display: inline-table;
+}
+
+.ivc-relation-types-matrix.list {
+    width: auto;
+}
+
+.ivc-relation-types-matrix th {
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    white-space: nowrap;
+    height: 140px;
+}
+
+.ivc-relation-types-matrix td:first-child,
+.ivc-relation-types-matrix th:first-child {
+    text-align: left;
+}
+
+.ivc-relation-types-matrix th.ivc-check-all,
+.ivc-relation-types-matrix td.ivc-check-all {
+    width: 60px;
 }
 </style>

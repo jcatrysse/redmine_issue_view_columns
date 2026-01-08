@@ -87,5 +87,6 @@ module RedmineIssueViewColumns
         errors.add(:issue_to_id, :taken)
       end
     end
+
   end
 end

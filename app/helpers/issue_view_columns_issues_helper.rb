@@ -152,8 +152,7 @@ module IssueViewColumnsIssuesHelper
     relations.group_by do |relation|
       relation.relation_type_for(issue) || relation.relation_type || UNKNOWN_RELATION_GROUP
     end.sort_by do |relation_type, _group_relations|
-      type = IssueRelation::TYPES[relation_type]
-      type ? type[:order] : Float::INFINITY
+      RedmineIssueViewColumns::RelationTypes.sort_key(relation_type)
     end.to_h
   end
 

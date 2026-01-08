@@ -1,5 +1,7 @@
 require_dependency File.dirname(__FILE__) + "/lib/redmine_issue_view_columns/relation_types.rb"
+require_dependency File.dirname(__FILE__) + "/lib/redmine_issue_view_columns/relation_type_settings.rb"
 require_dependency File.dirname(__FILE__) + "/lib/redmine_issue_view_columns/project_helper_patch.rb"
+require_dependency File.dirname(__FILE__) + "/lib/redmine_issue_view_columns/issue_relations_helper_patch.rb"
 require_dependency File.dirname(__FILE__) + "/lib/redmine_issue_view_columns/view_issues_show_hook.rb"
 
 Redmine::Plugin.register :redmine_issue_view_columns do
@@ -15,13 +17,16 @@ Redmine::Plugin.register :redmine_issue_view_columns do
   settings default: {
     "empty": true,
     "relations_group_by_type": false,
-    "project_relations_group_by_type": {}
+    "project_relations_group_by_type": {},
+    "project_relation_types": {},
+    "project_relation_types_all": {}
   }, partial: "settings/issue_view_columns_settings"
 end
 
 
 # helper methods needed for the Settings page of the project also
 ProjectsController.send :helper, IssueViewColumnsHelper
+SettingsController.send :helper, IssueViewColumnsHelper
 IssuesController.send :helper, IssueViewColumnsIssuesHelper
 IssueRelationsController.send :helper, IssueViewColumnsIssuesHelper
 
