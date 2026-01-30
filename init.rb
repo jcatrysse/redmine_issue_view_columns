@@ -2,13 +2,14 @@ require_dependency File.dirname(__FILE__) + "/lib/redmine_issue_view_columns/rel
 require_dependency File.dirname(__FILE__) + "/lib/redmine_issue_view_columns/relation_type_settings.rb"
 require_dependency File.dirname(__FILE__) + "/lib/redmine_issue_view_columns/project_helper_patch.rb"
 require_dependency File.dirname(__FILE__) + "/lib/redmine_issue_view_columns/issue_relations_helper_patch.rb"
+require_dependency File.dirname(__FILE__) + "/lib/redmine_issue_view_columns/issue_context_menu_hook.rb"
 require_dependency File.dirname(__FILE__) + "/lib/redmine_issue_view_columns/view_issues_show_hook.rb"
 
 Redmine::Plugin.register :redmine_issue_view_columns do
   name "Redmine Issue View Columns"
   author "Kenan Dervišević and Jan Catrysse"
   description "Customize shown columns in subtasks and related issues on issue page"
-  version "2.0.0"
+  version "2.0.2"
   url "https://github.com/jcatrysse/redmine_issue_view_columns"
 
   project_module :issue_view_columns do
@@ -29,6 +30,7 @@ ProjectsController.send :helper, IssueViewColumnsHelper
 SettingsController.send :helper, IssueViewColumnsHelper
 IssuesController.send :helper, IssueViewColumnsIssuesHelper
 IssueRelationsController.send :helper, IssueViewColumnsIssuesHelper
+ContextMenusController.send :helper, IssueViewColumnsContextMenuHelper
 
 local_config = File.join(__dir__, "config", "redmine_issue_view_columns.local.rb")
 load local_config if File.exist?(local_config)
