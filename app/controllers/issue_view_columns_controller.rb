@@ -2,6 +2,8 @@ class IssueViewColumnsController < ApplicationController
   include QueriesHelper
   include IssueViewColumnsHelper
   before_action :find_project_by_project_id
+  before_action :authorize, except: :update_relation_types
+  before_action :authorize_relation_types, only: :update_relation_types
   before_action :build_query_for_project
 
   def index
@@ -11,14 +13,14 @@ class IssueViewColumnsController < ApplicationController
   # refactor update, it's not good to do save like this
   def update
     update_selected_columns = params[:c] || []
-    IssueViewColumns.where("project_id = ?", params[:project_id]).delete_all
+    IssueViewColumns.where(project_id: @project.id).delete_all
     order = 0
     update_selected_columns.each do |col|
       # tracker and subject are always included in the first column
       next if ["tracker", "subject"].include? col
       c = IssueViewColumns.new
       order += 1
-      c.project_id = params[:project_id]
+      c.project_id = @project.id
       c.ident = col
       c.order = order
       c.save
@@ -92,6 +94,13 @@ class IssueViewColumnsController < ApplicationController
   end
 
   private
+
+  # The relation types tab is also shown to administrators when the module is off
+  def authorize_relation_types
+    return true if User.current.admin?
+
+    authorize
+  end
 
   def update_project_relation_types(project_relation_types, relation_types_param)
     if relation_types_param.any?

@@ -13,7 +13,9 @@ Redmine::Plugin.register :redmine_issue_view_columns do
   url "https://github.com/jcatrysse/redmine_issue_view_columns"
 
   project_module :issue_view_columns do
-    permission :manage_issue_view_columns, { issue_view_columns: :index }, { require: :member }
+    permission :manage_issue_view_columns,
+               { issue_view_columns: [:index, :update, :update_relation_types] },
+               { require: :member }
   end
   settings default: {
     "empty": true,
