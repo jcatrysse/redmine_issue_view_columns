@@ -31,10 +31,10 @@ what is left. Written 2026-10-06 from a measured analysis (report at the bottom)
 |---|---|---|
 | boot, production eager load | OK | OK |
 | plugin migrations down to 0 and up again (test db) | OK | OK |
-| minitest, Redmine 7.0-stable-GEOxyz | 49 runs, 0 failures, with and without a local relation type config | 49 runs, 202 assertions, 0 failures, 5 random seeds, with and without the local config |
-| minitest, Redmine 5.1-stable (Ruby 3.2) | 49 runs, 155 assertions, 0 failures | not run |
-| e2e `./.codex/e2e.sh` (smoke + core + 9 scenarios) | 11 runs, 62 screenshots, 0 problems | 11 runs, 62 screenshots, 0 problems |
-| together with redmine_depending_custom_fields and redmine_itil_priority (both @redmine70-migration) | | minitest 49 runs 0 failures; e2e 11 runs, 62 screenshots, 0 problems |
+| minitest, Redmine 7.0-stable-GEOxyz | 60 runs, 243 assertions, 0 failures, with and without a local relation type config | 60 runs, 243 assertions, 0 failures, 3 random seeds |
+| minitest, Redmine 5.1-stable (Ruby 3.2) | 60 runs, 182 assertions, 0 failures | not run |
+| e2e `./.codex/e2e.sh` (smoke + core + 9 scenarios) | 11 runs, 68 screenshots, 0 problems | 11 runs, 68 screenshots, 0 problems |
+| together with redmine_depending_custom_fields and redmine_itil_priority (both @redmine70-migration), before the decisions below | | minitest 49 runs 0 failures; e2e 11 runs, 62 screenshots, 0 problems |
 | OpenAI review (gpt-5) of 4cab08e..32231bf | "No findings." (`docs/reviews/openai-2026-10-06-32231bf.md`) | |
 
 Screenshots committed in `docs/e2e/` (Redmine 7, PostgreSQL; every one looked at). Before pictures in
@@ -61,6 +61,10 @@ itself works there.
 | `cfceae9` | e2e scenarios, seed, screenshots |
 | `19682b7` | hard-coded English legend translated |
 | `32231bf` | 2.1.0, README, CHANGELOG, before screenshots |
+| `a04e34b` | decision 1C: global columns from core's setting on 6.1+, migration 003, rake task |
+| `40e6f91` | decision 3C: cheap context menu checks, all-or-nothing create |
+| `9d65c54` | decision 4C: "Remove subtask", row ids, header row follows core's setting |
+| `fcbf8b7` | e2e for the decisions, screenshots refreshed |
 
 ## Baseline (2026-10-06, before any change, Redmine 7.0.1 @ 7.0-stable-GEOxyz 8067e23, Ruby 3.3.6)
 
@@ -75,12 +79,12 @@ itself works there.
 | function | how a user reaches it | scenario | screenshots (`docs/e2e/`) |
 |---|---|---|---|
 | Per-project columns, limit, grouping | Project > Settings > "Issue columns" (permission `manage_issue_view_columns`, module on) | `project_columns.mjs` | `project_columns-tab`, `-saved`, `-issue-new-column`, `-cancel`, `-reporter-refused`, `-module-off`, `-unchanged` |
-| Subtask and related issue tables with columns, remove icon | issue page | `issue_tables.mjs` | `issue_tables-manager`, `-remove-hover`, `-reporter`, `-outsider-public`, `-outsider-private` |
+| Subtask and related issue tables with columns, "Remove subtask" and "Remove relation" | issue page | `issue_tables.mjs` | `issue_tables-manager`, `-remove-hover`, `-subtask-removed`, `-reporter`, `-outsider-public`, `-outsider-private` |
 | Related issues limit, "Show all / Show fewer" | issue page | `relations_limit.mjs` | `relations_limit-setting`, `-collapsed`, `-expanded`, `-collapsed-grouped`, `-reporter`, `-invalid-limit`, `-negative-blocked` |
 | Group related issues by relation type | issue page | `relations_grouping.mjs` | `relations_grouping-grouped`, `-reverse`, `-not-grouped` |
-| Global defaults (columns, limit, grouping) for projects without the module | Administration > Plugins > Configure (admin) | `global_defaults.mjs` | `global_defaults-settings`, `-defaults`, `-global-limit-grouped`, `-project-overrides`, `-manager-refused` |
+| Global columns (core's setting on 6.1+), limit, grouping for projects without own columns; header row setting | Administration > Plugins > Configure, Administration > Settings > Issue tracking (admin) | `global_defaults.mjs` | `global_defaults-settings`, `-defaults`, `-core-columns`, `-core-columns-applied`, `-headers-off`, `-global-limit-grouped`, `-project-overrides`, `-manager-refused` |
 | Extra relation types (local config), per project in "Add relation" | project tab "Relation types", admin matrix, issue page | `relation_types.mjs` | `relation_types-default-dropdown`, `-tab`, `-added`, `-all`, `-matrix`, `-cleared`, `-reporter-refused` |
-| Context menu "Related to" (pairwise) and "Remove relation" | issue list, right click | `context_menu.mjs` | `context_menu-relate-three`, `-related`, `-nothing-missing`, `-remove-offered`, `-relate-again`, `-reporter` |
+| Context menu "Related to" (pairwise) and "Remove relation" | issue list, right click | `context_menu.mjs` | `context_menu-relate-three`, `-related`, `-nothing-missing`, `-remove-offered`, `-relate-again`, `-reporter`, `-cross-project-hidden`, `-all-or-nothing` |
 | AJAX add/remove relation keeps the plugin table | issue page, "Add" / remove icon | `ajax_relations.mjs` | `ajax_relations-added`, `-removed`, `-invalid` |
 | REST API with extra relation types; unique index per type (migration 002) | `POST /issues/:id/relations.json` | `rest_api.mjs` | `rest_api-api-relations` |
 | Webhooks (Redmine 7) | core | `rails runner`, below | none |
@@ -101,11 +105,11 @@ All done on 2026-10-06; status per item in brackets.
 
 1. [done fe69df1] Commit the init.rb fix (ContextMenus::IssuesController with fallback).
 2. [done bd31145] label_relation_delete -> label_relation_remove; icons to sprite_icon.
-3. [decided, open question 1] What stays now that core 6.1 has configurable related-issue columns (#42477): everything stays; core's tables and setting apply when the plugin has no columns.
+3. [done a04e34b, decision 1C] What stays now that core 6.1 has configurable related-issue columns (#42477): everything stays; core's tables and setting apply when the plugin has no columns.
 4. [done fe69df1] same as item 1.
 5. [done bd31145] same as item 2.
 6. [done bd31145] same as item 2.
-7. [decided, open question 1] same as item 3.
+7. [done a04e34b, decision 1C] same as item 3.
 8. [done b2fad81] fixture-dependent permission test.
 9. [done] tests on 7.0-stable-GEOxyz with PostgreSQL and MariaDB, and on 5.1-stable (see Results).
 10. [done, nothing needed] webhooks (see Inventory).
@@ -118,7 +122,7 @@ branch cannot be reached (`relation_type` is NOT NULL; a type no longer register
 
 | commit | date | subject | verdict |
 |---|---|---|---|
-| `605cc58` | 2026-01-30 | 2.0.2: add relation context menu | keep; Redmine 7 fixes fe69df1, bd31145; fixture dependence fixed b2fad81; cost with many issues: open question 3 |
+| `605cc58` | 2026-01-30 | 2.0.2: add relation context menu | keep; Redmine 7 fixes fe69df1, bd31145; fixture dependence fixed b2fad81; cost with many issues fixed by decision 3C (40e6f91) |
 | `84f6c58` | 2026-01-08 | 2.0.1: filterable relations | keep; its controller action had no authorization (f6bdfad); tests abf8817; Cancel/ids 2246dfd |
 | `10ea101` | 2025-12-26 | 2.0.0: configurable relations | keep; it broke the limit without grouping (fixed f3c77d1); migration 002 down/up checked |
 | `f921c4d` | 2025-12-16 | related issues limit with toggle | keep; tests added; its per-project values were erased by plugin settings Apply (fixed 2f0c9f0) |
@@ -129,7 +133,15 @@ branch cannot be reached (`relation_type` is NOT NULL; a type no longer register
 
 Actions the person doing the upgrade must take, or know about, for this plugin:
 
-- `rake redmine:plugins:migrate` has nothing new to run (2.1.0 adds no migration).
+- `rake redmine:plugins:migrate NAME=redmine_issue_view_columns` runs migration 003 (copies the
+  plugin's global columns into Redmine's "Related and sub issues list defaults"). Run it on Redmine 7.
+  If it already ran on 5.1 (where it does nothing), run
+  `rake redmine_issue_view_columns:copy_global_columns_to_core RAILS_ENV=production` after the Redmine
+  upgrade.
+- Headers of the subtask and related issue tables now follow Administration > Settings > Issue tracking
+  > "Show table headers" (off by default). Turn it on if GEOxyz wants to keep the column captions.
+- Projects with the module but without their own columns now show the plugin table with the global
+  columns instead of core's table.
 - Keep `config/redmine_issue_view_columns.local.rb` (and its locale file) when replacing the plugin
   directory: the extra relation types are defined there.
 - The project tabs now really require "Manage issue view columns" (before 2.1.0 anybody could post the
@@ -140,25 +152,22 @@ Actions the person doing the upgrade must take, or know about, for this plugin:
   (PostgreSQL rolls back cleanly; on MariaDB DDL is not transactional and the old index is then
   missing). Remove those duplicates first if a rollback is ever needed.
 
-## Open questions for Jan
+## Decided by Jan (2026-10-06)
 
-1. **Core #42477 vs the plugin's global columns.** Built: nothing removed. The plugin's global default
-   columns apply to projects without the module; when the plugin has no columns for a project, core's
-   tables and core's setting (Administration > Settings > Issue tracking) apply. Options: (a) keep as
-   is (recommended, no change for users); (b) drop the plugin's global column setting and rely on core
-   for projects without the module (one setting less, but then the plugin's table, limit and grouping
-   only work in projects with the module).
-2. **Behaviour fixes users will notice** (all built, all were defects): the limit works without
-   grouping; Cancel no longer saves; plugin settings Apply keeps per-project values; the project tabs
-   need the permission. Recommendation: ship, mention in the release notes.
-3. **Context menu cost with many selected issues.** `relates_clique_available?` validates every pair on
-   each right click: 10 issues 107 ms / 116 queries, 25 issues 462 ms / 651 queries, 44 issues
-   1421 ms / 1981 queries (Redmine 7, MariaDB, production mode). Options: (a) leave it (built);
-   (b) offer "Related to" only up to N selected issues (e.g. 10); (c) skip the per-pair validation
-   above N and let the create action report errors. Recommendation: (b) with N = 10.
-4. **Subtask remove button.** Core (5.1 and 7) shows a "Remove subtask" icon in the subtask table; the
-   plugin's table never had it, so it is missing when plugin columns are configured. Recommendation: add
-   it in a follow-up (core label and permission `manage_subtasks`).
+1. **1C: one source for the global columns.** On Redmine 6.1+ projects without columns of their own
+   (module off, or module on and nothing chosen) get the plugin table with core's "Related and sub
+   issues list defaults"; the plugin settings page links there. Migration 003 copies the plugin's
+   global columns into core's setting once; the plugin value is kept for a rollback. On 5.1 nothing
+   changes. Built in `a04e34b`.
+2. **2A: ship the behaviour fixes** (limit without grouping, Cancel, Apply, permission) and mention
+   them in the release notes (CHANGELOG 2.1.0).
+3. **3C: context menu.** Cheap checks on right click (permission, existing relations in one query,
+   same issue, cross-project setting, parent/subtask); creating validates in full inside one
+   transaction, all or nothing. 44 issues: 1421 ms / 1981 queries before, 34 ms / 89 queries after;
+   100 issues 122 ms / 201 queries. Built in `40e6f91`.
+4. **4C: plugin tables like core 7.** "Remove subtask" (permission manage_subtasks), `id="issue-N"` on
+   subtask rows, header row only when core's "Show table headers" is on (6.1+; default off, like
+   core). Built in `9d65c54`.
 
 ## Findings outside this plugin
 

@@ -24,11 +24,17 @@ Compatibility
 
 Tested with Redmine 7.0 (Rails 8.1) on PostgreSQL 16 and MariaDB 10.11, and with Redmine 5.1 on PostgreSQL.
 
-Since Redmine 6.1 core has its own global setting for the columns of subtasks and related issues
-(Administration > Settings > Issue tracking). This plugin adds per-project columns, the related issues
-limit, grouping by relation type, extra relation types and the context menu entries. When the plugin
-has no columns for a project (module off and no global default, or module on and no project columns),
-Redmine's own tables and settings are used.
+Global columns: on Redmine 6.1+ the subtask and related issue tables of every project without columns
+of its own use Redmine's setting "Related and sub issues list defaults" (Administration > Settings >
+Issue tracking, #42477), and their header row follows "Show table headers" there. The plugin settings
+page links to it and keeps the global limit, grouping and relation types. Upgrading from an older
+version copies the plugin's former global columns into that setting (migration 003); if the plugin
+was migrated before Redmine itself was upgraded, run
+`rake redmine_issue_view_columns:copy_global_columns_to_core RAILS_ENV=production`.
+On Redmine 5.1 the plugin's own global columns are used, as before.
+
+Per project (module "Issue view columns"): own columns, related issues limit, grouping by relation type.
+The plugin's tables also offer "Remove subtask" and "Remove relation" like core's.
 
 Permissions: "Manage issue view columns" (module "Issue view columns") gives access to the project
 tabs "Issue columns" and "Relation types"; administrators can always edit the relation types tab.

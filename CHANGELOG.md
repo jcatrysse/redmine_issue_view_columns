@@ -6,6 +6,9 @@
 - Fixed: the related issues limit did nothing when relations were not grouped.
 - Fixed: "Apply" on the plugin settings page erased the per-project limit and grouping.
 - Fixed: "Cancel" on the project tabs saved the form; labels of the grouping checkboxes did not toggle them.
+- Redmine 6.1+: global columns come from Redmine's own "Related and sub issues list defaults"; migration 003 copies the plugin's former global columns there; the header row follows Redmine's "Show table headers".
+- Subtask table: "Remove subtask" link and row ids like core's.
+- Context menu "Related to": fast for any selection; the relations are created all or nothing.
 - Tests for every function, end-to-end browser scenarios in test/e2e.
 
 # 2.0.1 - 2025-03-13 - Jan Catrysse
