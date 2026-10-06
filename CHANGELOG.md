@@ -1,5 +1,13 @@
 # Changelog
 
+# 2.1.0 - 2026-10-06 - Jan Catrysse
+- Redmine 7.0 support: context menu helper on ContextMenus::IssuesController, "Remove relation" label and SVG icons, column selector layout of Redmine 6+.
+- Security: the project settings actions (columns, limit, grouping, relation types) now require the "Manage issue view columns" permission.
+- Fixed: the related issues limit did nothing when relations were not grouped.
+- Fixed: "Apply" on the plugin settings page erased the per-project limit and grouping.
+- Fixed: "Cancel" on the project tabs saved the form; labels of the grouping checkboxes did not toggle them.
+- Tests for every function, end-to-end browser scenarios in test/e2e.
+
 # 2.0.1 - 2025-03-13 - Jan Catrysse
 - Added UI-only filtering for extra relation types with per-project configuration in the admin matrix and project tab.
 - Kept standard Redmine relation types always visible in the "Add relation" dropdown.

@@ -22,7 +22,16 @@ Basic functionality
 Compatibility
 -------------
 
-Plugin is compatible with Redmine 5.0.x on MySQL 8.x.x. Newer or older versions may work but have not been tested yet.
+Tested with Redmine 7.0 (Rails 8.1) on PostgreSQL 16 and MariaDB 10.11, and with Redmine 5.1 on PostgreSQL.
+
+Since Redmine 6.1 core has its own global setting for the columns of subtasks and related issues
+(Administration > Settings > Issue tracking). This plugin adds per-project columns, the related issues
+limit, grouping by relation type, extra relation types and the context menu entries. When the plugin
+has no columns for a project (module off and no global default, or module on and no project columns),
+Redmine's own tables and settings are used.
+
+Permissions: "Manage issue view columns" (module "Issue view columns") gives access to the project
+tabs "Issue columns" and "Relation types"; administrators can always edit the relation types tab.
 
 Installation
 ------------
