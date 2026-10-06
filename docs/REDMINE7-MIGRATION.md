@@ -36,6 +36,7 @@ what is left. Written 2026-10-06 from a measured analysis (report at the bottom)
 | e2e `./.codex/e2e.sh` (smoke + core + 9 scenarios) | 11 runs, 68 screenshots, 0 problems | 11 runs, 68 screenshots, 0 problems |
 | together with redmine_depending_custom_fields and redmine_itil_priority (both @redmine70-migration), before the decisions below | | minitest 49 runs 0 failures; e2e 11 runs, 62 screenshots, 0 problems |
 | OpenAI review (gpt-5) of 4cab08e..32231bf | "No findings." (`docs/reviews/openai-2026-10-06-32231bf.md`) | |
+| OpenAI review (gpt-5) of 32231bf..034ce6e (the decisions) | 1 finding, not a defect (Ruby defines the local in the untaken branch; 5.1 suite green), `docs/reviews/openai-2026-10-06-034ce6e.md` | |
 
 Screenshots committed in `docs/e2e/` (Redmine 7, PostgreSQL; every one looked at). Before pictures in
 `docs/e2e/before/`: branch 2.0.0 on Redmine 5.1 (the scenarios fail there where the fixes apply), and
