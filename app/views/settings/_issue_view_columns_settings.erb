@@ -4,9 +4,14 @@
 
 <fieldset class="box">
   <legend>Select default columns for issue's subtasks and related issues:</legend>
-    <%= render_query_columns_selection(
-            IssueQuery.new(:column_names => Setting.plugin_redmine_issue_view_columns["issue_view_default_columns"]),
-            :name => 'settings[issue_view_default_columns]') %>
+    <%# Redmine 6+ lays the column selector out inside #list-definition > div, like core's settings %>
+    <div id="list-definition">
+      <div>
+        <%= render_query_columns_selection(
+                IssueQuery.new(:column_names => Setting.plugin_redmine_issue_view_columns["issue_view_default_columns"]),
+                :name => 'settings[issue_view_default_columns]') %>
+      </div>
+    </div>
 </fieldset>
 
 <div class="field">

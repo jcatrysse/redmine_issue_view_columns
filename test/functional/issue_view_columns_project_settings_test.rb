@@ -24,7 +24,9 @@ class IssueViewColumnsProjectSettingsTest < Redmine::ControllerTest
     assert_select "#tab-issue_view_columns", text: I18n.t(:issue_view_columns_settings)
     assert_select "form[action=?]", "/issue_view_columns" do
       assert_select "input[name=project_id][value=?]", @project.id.to_s
-      assert_select "select#selected_c"
+      # Redmine 6+ CSS lays the selector out side by side only inside #list-definition > div
+      assert_select "#list-definition > div select#available_c"
+      assert_select "#list-definition > div select#selected_c"
       assert_select "input[name=relations_limit]"
       assert_select "input[type=checkbox][name=relations_group_by_type]"
     end

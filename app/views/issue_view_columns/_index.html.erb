@@ -5,7 +5,12 @@
   <%= hidden_field_tag 'project_id', @project.id %>
   <fieldset class="box">
     <legend> <%= l(:label_select_columns) %> </legend>
-    <%= render_query_columns_selection(build_query_for_project) %>
+    <%# Redmine 6+ lays the column selector out inside #list-definition > div, like core's settings %>
+    <div id="list-definition">
+      <div>
+        <%= render_query_columns_selection(build_query_for_project) %>
+      </div>
+    </div>
   </fieldset>
 
   <div class="field">
