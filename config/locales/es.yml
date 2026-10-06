@@ -19,3 +19,4 @@ es:
   label_relates_to_business: "Relacionado con (negocio)"
   label_relates_to_technical: "Relacionado con (técnico)"
   label_issue_view_columns_core_columns_html: "Las subtareas y tareas relacionadas usan las columnas definidas en %{link}."
+  label_issue_view_columns_relations_not_created: "No se creó ninguna relación: %{errors}"

@@ -14,31 +14,38 @@ class IssueViewColumnsRelationsController < ApplicationController
       memo[pair.sort] = true
     end
 
-    unsaved_relations = []
+    unsaved_relation = nil
 
-    @issues.combination(2) do |issue_from, issue_to|
-      pair = [issue_from.id, issue_to.id].sort
-      next if existing_pairs[pair]
+    # all or nothing: the context menu only checks the cheap rules, so a pair can still fail here
+    IssueRelation.transaction do
+      @issues.combination(2) do |issue_from, issue_to|
+        pair = [issue_from.id, issue_to.id].sort
+        next if existing_pairs[pair]
 
-      relation = IssueRelation.new(
-        issue_from: issue_from,
-        issue_to: issue_to,
-        relation_type: IssueRelation::TYPE_RELATES
-      )
-      relation.init_journals(User.current)
+        relation = IssueRelation.new(
+          issue_from: issue_from,
+          issue_to: issue_to,
+          relation_type: IssueRelation::TYPE_RELATES
+        )
+        relation.init_journals(User.current)
 
-      begin
-        saved = relation.save
-      rescue ActiveRecord::RecordNotUnique
-        relation.errors.add :base, :taken
-        saved = false
+        begin
+          saved = relation.save
+        rescue ActiveRecord::RecordNotUnique
+          relation.errors.add :base, :taken
+          saved = false
+        end
+
+        unless saved
+          unsaved_relation = relation
+          raise ActiveRecord::Rollback
+        end
       end
-
-      unsaved_relations << relation unless saved
     end
 
-    if unsaved_relations.any?
-      flash[:error] = unsaved_relations.flat_map { |relation| relation.errors.full_messages }.uniq.join(', ')
+    if unsaved_relation
+      flash[:error] = l(:label_issue_view_columns_relations_not_created,
+                        errors: unsaved_relation.errors.full_messages.join(', '))
     end
 
     redirect_back_or_default(issues_path)

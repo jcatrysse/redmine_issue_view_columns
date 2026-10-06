@@ -19,3 +19,4 @@ it:
   label_relates_to_business: "Relazionato a (business)"
   label_relates_to_technical: "Relazionato a (tecnico)"
   label_issue_view_columns_core_columns_html: "Le sottoattività e le attività correlate usano le colonne definite in %{link}."
+  label_issue_view_columns_relations_not_created: "Nessuna relazione è stata creata: %{errors}"

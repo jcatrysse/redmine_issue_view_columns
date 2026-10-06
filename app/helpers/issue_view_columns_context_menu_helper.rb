@@ -32,14 +32,16 @@ module IssueViewColumnsContextMenuHelper
     end
     return false if missing_pairs.empty?
 
-    missing_pairs.all? do |issue_from, issue_to|
-      relation = IssueRelation.new(
-        issue_from: issue_from,
-        issue_to: issue_to,
-        relation_type: IssueRelation::TYPE_RELATES
-      )
-      relation.valid?
-    end
+    # The cheap part of IssueRelation's validation, without a query per pair (the menu opens on
+    # every right click); the create action validates every pair in full.
+    missing_pairs.all? { |issue_from, issue_to| relatable_issues?(issue_from, issue_to) }
+  end
+
+  def relatable_issues?(issue_from, issue_to)
+    return false if issue_from.id == issue_to.id
+    return false unless issue_from.project_id == issue_to.project_id || Setting.cross_project_issue_relations?
+
+    !(issue_from.is_descendant_of?(issue_to) || issue_from.is_ancestor_of?(issue_to))
   end
 
   def relates_relation_for_context_menu(issues)

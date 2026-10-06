@@ -19,3 +19,4 @@ en:
   label_relates_to_business: "Relates to (business)"
   label_relates_to_technical: "Relates to (technical)"
   label_issue_view_columns_core_columns_html: "Subtasks and related issues use the columns set in %{link}."
+  label_issue_view_columns_relations_not_created: "No relation was created: %{errors}"

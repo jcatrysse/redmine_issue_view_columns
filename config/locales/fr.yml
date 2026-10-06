@@ -19,3 +19,4 @@ fr:
   label_relates_to_business: "Lié à (métier)"
   label_relates_to_technical: "Lié à (technique)"
   label_issue_view_columns_core_columns_html: "Les sous-tâches et les tâches liées utilisent les colonnes définies dans %{link}."
+  label_issue_view_columns_relations_not_created: "Aucune relation n'a été créée : %{errors}"

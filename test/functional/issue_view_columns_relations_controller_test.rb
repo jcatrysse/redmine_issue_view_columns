@@ -50,6 +50,22 @@ class IssueViewColumnsRelationsControllerTest < Redmine::ControllerTest
     end
   end
 
+  def test_create_is_all_or_nothing_when_one_pair_is_invalid
+    @request.session[:user_id] = 1
+    issue_one = Issue.generate!(project: Project.find(1))
+    issue_two = Issue.generate!(project: Project.find(1))
+    other_project = Issue.generate!(project: Project.find(2))
+
+    with_settings cross_project_issue_relations: "0" do
+      assert_no_difference ["IssueRelation.count", "Journal.count"] do
+        post :create, params: { ids: [issue_one.id, issue_two.id, other_project.id], back_url: "/issues" }
+      end
+    end
+
+    assert_redirected_to "/issues"
+    assert_match(/\A#{Regexp.escape(I18n.t(:label_issue_view_columns_relations_not_created, errors: ""))}/, flash[:error])
+  end
+
   def test_create_requires_manage_relations_permission
     # A logged-in non-member gets the "Non member" role, which has
     # manage_issue_relations in Redmine's fixtures: take it away explicitly.

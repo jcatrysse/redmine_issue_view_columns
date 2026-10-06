@@ -19,3 +19,4 @@ nl:
   label_relates_to_business: "Gerelateerd aan (business)"
   label_relates_to_technical: "Gerelateerd aan (technisch)"
   label_issue_view_columns_core_columns_html: "Subtaken en gerelateerde taken gebruiken de kolommen uit %{link}."
+  label_issue_view_columns_relations_not_created: "Er is geen relatie aangemaakt: %{errors}"

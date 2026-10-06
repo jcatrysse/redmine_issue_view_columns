@@ -19,3 +19,4 @@ bs:
   label_relates_to_business: "Relates to (business)"
   label_relates_to_technical: "Relates to (technical)"
   label_issue_view_columns_core_columns_html: "Podzadaci i vezani tiketi koriste kolone iz %{link}."
+  label_issue_view_columns_relations_not_created: "Nijedna veza nije kreirana: %{errors}"
