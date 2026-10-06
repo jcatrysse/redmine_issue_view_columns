@@ -16,10 +16,12 @@ class IssueViewColumnsIssuePageTest < Redmine::ControllerTest
     @other = Issue.generate!(project: @project)
     @relation = IssueRelation.create!(issue_from: @issue, issue_to: @other, relation_type: IssueRelation::TYPE_RELATES)
     @original_settings = Setting.plugin_redmine_issue_view_columns
+    @original_core_columns = Setting.related_issues_default_columns if RedmineIssueViewColumns::GlobalColumns.core_setting?
   end
 
   def teardown
     Setting.plugin_redmine_issue_view_columns = @original_settings
+    Setting.related_issues_default_columns = @original_core_columns if @original_core_columns
   end
 
   def test_related_issues_table_has_translated_remove_relation_link
@@ -101,28 +103,40 @@ class IssueViewColumnsIssuePageTest < Redmine::ControllerTest
     assert_select "#issue_tree tr.issue td.status", 1
   end
 
-  def test_global_default_columns_apply_when_the_module_is_disabled
+  # Redmine 6.1+: the global columns are core's related issues columns (#42477); before, the plugin's
+  def test_global_columns_apply_when_the_module_is_disabled
     @project.disable_module!(:issue_view_columns)
-    plugin_settings("issue_view_default_columns" => %w[priority])
+    global_columns(%w[priority])
     @request.session[:user_id] = 1
 
     get :show, params: { id: @issue.id }
 
     assert_response :success
-    assert_select "#relations th", text: I18n.t(:field_priority)
-    assert_select "#relations th", text: I18n.t(:field_status), count: 0
+    assert_select "#relations tr.ivc-relation-row td.priority"
+    assert_select "#relations tr.ivc-relation-row td.status", 0
   end
 
-  def test_core_table_is_used_without_plugin_columns
+  def test_global_columns_apply_when_the_project_has_no_columns_of_its_own
     IssueViewColumns.where(project_id: @project.id).delete_all
+    global_columns(%w[priority])
+    @request.session[:user_id] = 1
+
+    get :show, params: { id: @issue.id }
+
+    assert_response :success
+    assert_select "#relations tr.ivc-relation-row td.priority"
+  end
+
+  def test_core_table_is_used_without_any_columns
+    IssueViewColumns.where(project_id: @project.id).delete_all
+    global_columns([])
     @request.session[:user_id] = 1
 
     get :show, params: { id: @issue.id }
 
     assert_response :success
     assert_select "#relations tr#relation-#{@relation.id}"
-    # the plugin's table has a "check all" header; core's has none
-    assert_select "#relations th.checkbox", 0
+    assert_select "#relations tr.ivc-relation-row", 0
   end
 
   private
@@ -131,6 +145,14 @@ class IssueViewColumnsIssuePageTest < Redmine::ControllerTest
     count.times do
       IssueRelation.create!(issue_from: @issue, issue_to: Issue.generate!(project: @project),
                             relation_type: IssueRelation::TYPE_RELATES)
+    end
+  end
+
+  def global_columns(names)
+    if RedmineIssueViewColumns::GlobalColumns.core_setting?
+      Setting.related_issues_default_columns = names
+    else
+      plugin_settings("issue_view_default_columns" => names)
     end
   end
 

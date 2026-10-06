@@ -18,3 +18,4 @@ pt:
   label_issue_view_columns_all_relations_hint: "All relations overrides the individual selections in the row."
   label_relates_to_business: "Relacionado a (negócio)"
   label_relates_to_technical: "Relacionado a (técnico)"
+  label_issue_view_columns_core_columns_html: "As subtarefas e tarefas relacionadas usam as colunas definidas em %{link}."

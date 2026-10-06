@@ -182,11 +182,12 @@ module IssueViewColumnsIssuesHelper
     available_fields = query.available_inline_columns
     subtask_fields = []
 
-    unless issue.project.module_enabled?(:issue_view_columns)
-      all_fields = Setting.plugin_redmine_issue_view_columns["issue_view_default_columns"] || []
-    else
-      all_fields = IssueViewColumns.all.select { |c| c.project_id == issue.project_id }.sort_by { |o| o.order }.collect { |f| f.ident } || []
+    all_fields = []
+    if issue.project.module_enabled?(:issue_view_columns)
+      all_fields = IssueViewColumns.all.select { |c| c.project_id == issue.project_id }.sort_by { |o| o.order }.collect { |f| f.ident }
     end
+    # without project columns: the global columns (core's setting on Redmine 6.1+, the plugin's before)
+    all_fields = RedmineIssueViewColumns::GlobalColumns.column_names if all_fields.empty?
 
     all_fields.each do |field|
       if ["tracker", "subject"].include? field

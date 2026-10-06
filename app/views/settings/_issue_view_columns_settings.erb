@@ -4,6 +4,17 @@
 
 <fieldset class="box">
   <legend><%= l(:label_select_columns) %></legend>
+  <% if RedmineIssueViewColumns::GlobalColumns.core_setting? %>
+    <%# Redmine 6.1+: core's related issues columns are the global columns; keep the old plugin value on Apply %>
+    <p class="ivc-core-columns">
+      <%= t(:label_issue_view_columns_core_columns_html,
+            link: link_to("#{l(:label_administration)} » #{l(:label_settings)} » #{l(:label_issue_tracking)}",
+                          settings_path(tab: 'issues'))) %>
+    </p>
+    <% RedmineIssueViewColumns::GlobalColumns.plugin_columns.each do |column| %>
+      <%= hidden_field_tag 'settings[issue_view_default_columns][]', column, id: nil %>
+    <% end %>
+  <% else %>
     <%# Redmine 6+ lays the column selector out inside #list-definition > div, like core's settings %>
     <div id="list-definition">
       <div>
@@ -12,6 +23,7 @@
                 :name => 'settings[issue_view_default_columns]') %>
       </div>
     </div>
+  <% end %>
 </fieldset>
 
 <div class="field">

@@ -1,5 +1,6 @@
 require_dependency File.dirname(__FILE__) + "/lib/redmine_issue_view_columns/relation_types.rb"
 require_dependency File.dirname(__FILE__) + "/lib/redmine_issue_view_columns/relation_type_settings.rb"
+require_dependency File.dirname(__FILE__) + "/lib/redmine_issue_view_columns/global_columns.rb"
 require_dependency File.dirname(__FILE__) + "/lib/redmine_issue_view_columns/project_helper_patch.rb"
 require_dependency File.dirname(__FILE__) + "/lib/redmine_issue_view_columns/issue_relations_helper_patch.rb"
 require_dependency File.dirname(__FILE__) + "/lib/redmine_issue_view_columns/issue_context_menu_hook.rb"

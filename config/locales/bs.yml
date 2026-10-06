@@ -18,3 +18,4 @@ bs:
   label_issue_view_columns_all_relations_hint: "All relations overrides the individual selections in the row."
   label_relates_to_business: "Relates to (business)"
   label_relates_to_technical: "Relates to (technical)"
+  label_issue_view_columns_core_columns_html: "Podzadaci i vezani tiketi koriste kolone iz %{link}."
