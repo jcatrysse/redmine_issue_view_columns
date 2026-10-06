@@ -53,6 +53,7 @@ ivc_issue(project, 'IVC spare')
 
 np = ivc_issue(nomodule, 'IVC no module parent')
 ivc_relate(np, ivc_issue(nomodule, 'IVC no module related'), 'relates')
+ivc_relate(np, ivc_issue(nomodule, 'IVC no module blocked'), 'blocks')
 
 ivc_issue(private_project, 'IVC private issue')
 
