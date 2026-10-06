@@ -21,6 +21,7 @@ class IssueViewColumnsPluginSettingsTest < Redmine::ControllerTest
     get :plugin, params: { id: "redmine_issue_view_columns" }
 
     assert_response :success
+    assert_select "fieldset legend", text: I18n.t(:label_select_columns)
     # Redmine 6+ CSS lays the selector out side by side only inside #list-definition > div
     assert_select "#list-definition > div select#available_settings_issue_view_default_columns"
     assert_select "#list-definition > div select#selected_settings_issue_view_default_columns option", 2

@@ -3,7 +3,7 @@
 <%= javascript_include_tag(:'relation_type_matrix', plugin: "redmine_issue_view_columns") %>
 
 <fieldset class="box">
-  <legend>Select default columns for issue's subtasks and related issues:</legend>
+  <legend><%= l(:label_select_columns) %></legend>
     <%# Redmine 6+ lays the column selector out inside #list-definition > div, like core's settings %>
     <div id="list-definition">
       <div>
