@@ -17,14 +17,17 @@ class IssueViewColumnsIssuePageTest < Redmine::ControllerTest
     @relation = IssueRelation.create!(issue_from: @issue, issue_to: @other, relation_type: IssueRelation::TYPE_RELATES)
     @original_settings = Setting.plugin_redmine_issue_view_columns
     @original_core_columns = Setting.related_issues_default_columns if RedmineIssueViewColumns::GlobalColumns.core_setting?
+    @original_headers = Setting.display_related_issues_table_headers if Setting.available_settings.key?("display_related_issues_table_headers")
   end
 
   def teardown
     Setting.plugin_redmine_issue_view_columns = @original_settings
     Setting.related_issues_default_columns = @original_core_columns if @original_core_columns
+    Setting.display_related_issues_table_headers = @original_headers unless @original_headers.nil?
   end
 
   def test_related_issues_table_has_translated_remove_relation_link
+    table_headers(true)
     @request.session[:user_id] = 1
 
     get :show, params: { id: @issue.id }
@@ -93,6 +96,7 @@ class IssueViewColumnsIssuePageTest < Redmine::ControllerTest
   end
 
   def test_subtasks_table_shows_the_project_columns
+    table_headers(true)
     Issue.generate!(project: @project, parent_issue_id: @issue.id)
     @request.session[:user_id] = 1
 
@@ -104,6 +108,51 @@ class IssueViewColumnsIssuePageTest < Redmine::ControllerTest
   end
 
   # Redmine 6.1+: the global columns are core's related issues columns (#42477); before, the plugin's
+  def test_subtasks_table_has_core_remove_subtask_link_and_row_id
+    child = Issue.generate!(project: @project, parent_issue_id: @issue.id)
+    @request.session[:user_id] = 1
+
+    get :show, params: { id: @issue.id }
+
+    assert_response :success
+    label = I18n.t(:label_subtask_remove, default: :label_delete_link_to_subtask)
+    assert_select "#issue_tree tr#issue-#{child.id}.issue td.buttons" do
+      assert_select "a.icon-link-break[data-method=put][title=?][href*=?]", label, "parent_issue_id%5D=" do
+        assert_select "svg use[href*=?]", "link-break" if Redmine::VERSION::MAJOR >= 6
+      end
+      assert_select "a.icon-actions"
+    end
+  end
+
+  def test_subtasks_table_has_no_remove_subtask_link_without_manage_subtasks
+    Issue.generate!(project: @project, parent_issue_id: @issue.id)
+    Role.anonymous.add_permission!(:view_issues)
+    Role.anonymous.remove_permission!(:manage_subtasks)
+
+    get :show, params: { id: @issue.id }
+
+    assert_response :success
+    assert_select "#issue_tree tr.issue"
+    assert_select "#issue_tree a.icon-link-break", 0
+  end
+
+  def test_table_headers_follow_the_core_setting
+    Issue.generate!(project: @project, parent_issue_id: @issue.id)
+    @request.session[:user_id] = 1
+
+    table_headers(false)
+    get :show, params: { id: @issue.id }
+    # Redmine 6.1+ hides the headers unless "Display table headers" is on; 5.1 has no such setting
+    expected = RedmineIssueViewColumns::GlobalColumns.core_setting? ? 0 : 1
+    assert_select "#relations table thead", expected
+    assert_select "#issue_tree table thead", expected
+
+    table_headers(true)
+    get :show, params: { id: @issue.id }
+    assert_select "#relations table thead", 1
+    assert_select "#issue_tree table thead", 1
+  end
+
   def test_global_columns_apply_when_the_module_is_disabled
     @project.disable_module!(:issue_view_columns)
     global_columns(%w[priority])
@@ -146,6 +195,12 @@ class IssueViewColumnsIssuePageTest < Redmine::ControllerTest
       IssueRelation.create!(issue_from: @issue, issue_to: Issue.generate!(project: @project),
                             relation_type: IssueRelation::TYPE_RELATES)
     end
+  end
+
+  def table_headers(on)
+    return unless Setting.available_settings.key?("display_related_issues_table_headers")
+
+    Setting.display_related_issues_table_headers = on ? "1" : "0"
   end
 
   def global_columns(names)

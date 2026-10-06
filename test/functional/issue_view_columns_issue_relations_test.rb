@@ -21,6 +21,11 @@ class IssueViewColumnsIssueRelationsTest < Redmine::ControllerTest
   end
 
   def test_create_by_xhr_renders_the_plugin_table
+    # the "check all" box sits in the header row, which Redmine 6.1+ only shows with this setting
+    if Setting.available_settings.key?("display_related_issues_table_headers")
+      original_headers = Setting.display_related_issues_table_headers
+      Setting.display_related_issues_table_headers = "1"
+    end
     assert_difference "IssueRelation.count", 1 do
       post :create, params: { issue_id: @issue.id,
                               relation: { issue_to_id: @other.id.to_s, relation_type: IssueRelation::TYPE_RELATES } },
@@ -30,6 +35,8 @@ class IssueViewColumnsIssueRelationsTest < Redmine::ControllerTest
     assert_response :success
     assert_include "ivc-relation-row", response.body
     assert_include "toggle-selection", response.body
+  ensure
+    Setting.display_related_issues_table_headers = original_headers unless original_headers.nil?
   end
 
   def test_destroy_by_xhr_renders_the_plugin_table

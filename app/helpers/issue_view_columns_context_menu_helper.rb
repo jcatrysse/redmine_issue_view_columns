@@ -6,6 +6,18 @@ module IssueViewColumnsContextMenuHelper
     ::I18n.t(:label_relation_remove, default: :label_relation_delete)
   end
 
+  # Redmine 6.0 renamed label_delete_link_to_subtask to label_subtask_remove
+  def ivc_subtask_remove_label
+    ::I18n.t(:label_subtask_remove, default: :label_delete_link_to_subtask)
+  end
+
+  # Redmine 6.1+ setting "Display table headers in related issues"; the plugin always showed them before
+  def ivc_table_headers?
+    return true unless Setting.available_settings.key?("display_related_issues_table_headers")
+
+    Setting.display_related_issues_table_headers?
+  end
+
   # SVG icon with label on Redmine 6+ (sprite_icon); the label alone on 5.1, where icon CSS draws it
   def ivc_icon_with_label(icon, label)
     respond_to?(:sprite_icon) ? sprite_icon(icon, label) : label

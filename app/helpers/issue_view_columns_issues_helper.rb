@@ -29,7 +29,8 @@ module IssueViewColumnsIssuesHelper
     end
     headers << content_tag(:th, l(:label_actions), style: 'text-align:right') if Redmine::VERSION::MAJOR >= 4
 
-    s << content_tag(:thead, content_tag(:tr, safe_join(headers)))
+    s << content_tag(:thead, content_tag(:tr, safe_join(headers))) if ivc_table_headers?
+    manage_subtasks = User.current.allowed_to?(:manage_subtasks, issue.project)
     # set data
     issue_list(issue.descendants.visible.preload(:status, :priority, :tracker, :assigned_to).sort_by(&:lft)) do |child, level|
       css = "issue issue-#{child.id} hascontextmenu #{child.css_classes}"
@@ -43,11 +44,23 @@ module IssueViewColumnsIssuesHelper
         field_content << content_tag("td", column_content(column, child), class: "#{column.css_classes}", style: "text-align:left")
       end
 
-      if (Redmine::VERSION::MAJOR >= 4)
-        field_content << content_tag('td', link_to_context_menu, class: 'buttons', style: "text-align:right")
-      end
+      # the "Remove subtask" link of core's table
+      buttons =
+        if manage_subtasks
+          link_to(ivc_icon_with_label('link-break', ivc_subtask_remove_label),
+                  issue_path({ id: child.id, issue: { parent_issue_id: '' },
+                               back_url: issue_path(issue.id), no_flash: '1' }),
+                  method: :put,
+                  data: { confirm: l(:text_are_you_sure) },
+                  title: ivc_subtask_remove_label,
+                  class: 'icon-only icon-link-break')
+        else
+          "".html_safe
+        end
+      buttons << link_to_context_menu
+      field_content << content_tag('td', buttons, class: 'buttons', style: "text-align:right")
 
-      field_values << content_tag("tr", field_content, class: css).html_safe
+      field_values << content_tag("tr", field_content, class: css, id: "issue-#{child.id}").html_safe
     end
 
     s << field_values
@@ -83,7 +96,7 @@ module IssueViewColumnsIssuesHelper
     end
     headers << content_tag(:th, l(:label_actions), style: 'text-align:right') if Redmine::VERSION::MAJOR >= 4
 
-    s << content_tag(:thead, content_tag(:tr, safe_join(headers)))
+    s << content_tag(:thead, content_tag(:tr, safe_join(headers))) if ivc_table_headers?
 
     grouped = relations_grouped_by_type_for(issue.project)
     relation_groups = grouped ? group_relations_by_type(issue, relations) : { nil => relations }
