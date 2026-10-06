@@ -1,7 +1,9 @@
 require File.expand_path("../test_helper", __dir__)
 
 class IssueViewColumnsRelationsControllerTest < Redmine::ControllerTest
-  fixtures :projects, :users, :roles, :members, :member_roles
+  fixtures :projects, :users, :roles, :members, :member_roles,
+           :trackers, :projects_trackers, :enabled_modules, :issue_statuses,
+           :enumerations, :workflows
 
   def setup
     User.current = nil
@@ -49,6 +51,9 @@ class IssueViewColumnsRelationsControllerTest < Redmine::ControllerTest
   end
 
   def test_create_requires_manage_relations_permission
+    # A logged-in non-member gets the "Non member" role, which has
+    # manage_issue_relations in Redmine's fixtures: take it away explicitly.
+    Role.non_member.remove_permission!(:manage_issue_relations)
     user = User.generate!
     @request.session[:user_id] = user.id
     project = Project.find(1)
@@ -85,5 +90,31 @@ class IssueViewColumnsRelationsControllerTest < Redmine::ControllerTest
     end
 
     assert_redirected_to back_url
+  end
+
+  def test_destroy_requires_manage_relations_permission
+    Role.non_member.remove_permission!(:manage_issue_relations)
+    user = User.generate!
+    @request.session[:user_id] = user.id
+    project = Project.find(1)
+    relation = IssueRelation.create!(
+      issue_from: Issue.generate!(project: project),
+      issue_to: Issue.generate!(project: project),
+      relation_type: IssueRelation::TYPE_RELATES
+    )
+
+    assert_no_difference "IssueRelation.count" do
+      delete :destroy, params: { id: relation.id }
+    end
+
+    assert_response 403
+  end
+
+  def test_destroy_unknown_relation_returns_404
+    @request.session[:user_id] = 1
+
+    delete :destroy, params: { id: 999_999 }
+
+    assert_response 404
   end
 end
