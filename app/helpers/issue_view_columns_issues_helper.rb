@@ -1,5 +1,6 @@
 module IssueViewColumnsIssuesHelper
   include IssueViewColumnsHelper
+  include IssueViewColumnsContextMenuHelper
   def render_descendants_tree(issue)
     columns_list = get_fields_for_project(issue)
     # no field defined, then use render from core redmine (or whatever by other plugins loaded before this)
@@ -97,12 +98,12 @@ module IssueViewColumnsIssuesHelper
         css = "issue hascontextmenu #{other_issue.css_classes} #{relation.css_classes_for(other_issue)}"
         css << (row_index.even? ? " odd" : " even")
         row_index += 1
-        link = manage_relations ? link_to(l(:label_relation_delete),
+        link = manage_relations ? link_to(ivc_icon_with_label('link-break', ivc_relation_remove_label),
                                           relation_path(relation, issue_id: issue.id),
                                           remote: true,
                                           method: :delete,
                                           data: { confirm: l(:text_are_you_sure) },
-                                          title: l(:label_relation_delete),
+                                          title: ivc_relation_remove_label,
                                           class: "icon-only icon-link-break") : ""
 
         field_content = content_tag("td", check_box_tag("ids[]", other_issue.id, false, id: nil), class: "checkbox") +

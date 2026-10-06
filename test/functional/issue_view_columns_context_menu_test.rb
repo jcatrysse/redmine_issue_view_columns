@@ -28,7 +28,26 @@ class IssueViewColumnsContextMenuTest < Redmine::ControllerTest
     get_context_menu [@issue_one.id, @issue_two.id]
 
     assert_response :success
-    assert_select "a[href^=?][data-method=post]", "/issue_view_columns/relations", text: /#{I18n.t(:label_relates_to)}/
+    assert_select "a[href^=?][data-method=post]", "/issue_view_columns/relations", text: /#{I18n.t(:label_relates_to)}/ do
+      assert_select "svg use[href*=?]", "icon--link" if Redmine::VERSION::MAJOR >= 6
+    end
+    assert_select "a[data-method=delete][href^=?]", "/issue_view_columns/relations/", 0
+  end
+
+  def test_context_menu_offers_translated_remove_relation_for_related_issues
+    relation = IssueRelation.create!(issue_from: @issue_one, issue_to: @issue_two,
+                                     relation_type: IssueRelation::TYPE_RELATES)
+
+    get_context_menu [@issue_one.id, @issue_two.id]
+
+    assert_response :success
+    label = I18n.t(:label_relation_remove, default: :label_relation_delete)
+    assert_select "a[data-method=delete][href^=?]", "/issue_view_columns/relations/#{relation.id}", text: /#{label}/ do |links|
+      assert_no_match(/translation missing/i, links.first.to_s)
+      assert_select "svg use[href*=?]", "link-break" if Redmine::VERSION::MAJOR >= 6
+    end
+    # every pair is already related, so "Related to" is not offered again
+    assert_select "a[href^=?][data-method=post]", "/issue_view_columns/relations", 0
   end
 
   private

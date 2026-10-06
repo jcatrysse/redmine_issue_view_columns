@@ -1,6 +1,16 @@
 # frozen_string_literal: true
 
 module IssueViewColumnsContextMenuHelper
+  # Redmine 6.0 renamed label_relation_delete to label_relation_remove
+  def ivc_relation_remove_label
+    ::I18n.t(:label_relation_remove, default: :label_relation_delete)
+  end
+
+  # SVG icon with label on Redmine 6+ (sprite_icon); the label alone on 5.1, where icon CSS draws it
+  def ivc_icon_with_label(icon, label)
+    respond_to?(:sprite_icon) ? sprite_icon(icon, label) : label
+  end
+
   def relates_clique_available?(issues)
     return false if issues.blank? || issues.size < 2
     return false unless issues.all? { |issue| User.current.allowed_to?(:manage_issue_relations, issue.project) }
