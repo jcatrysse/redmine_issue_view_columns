@@ -34,6 +34,13 @@
   <em class="info"><%= l(:label_issue_view_columns_group_relations_by_type_hint) %></em>
 </div>
 
+<%# Redmine replaces all plugin settings on Apply: keep the per-project values of the project tab %>
+<% %w[project_relations_limits project_relations_group_by_type].each do |key| %>
+  <% (Setting.plugin_redmine_issue_view_columns[key] || {}).each do |project_id, value| %>
+    <%= hidden_field_tag "settings[#{key}][#{project_id}]", value, id: nil %>
+  <% end %>
+<% end %>
+
 <fieldset class="box">
   <legend><%= l(:label_issue_view_columns_project_relation_types) %></legend>
   <div class="field">
