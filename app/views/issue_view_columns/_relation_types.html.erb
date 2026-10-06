@@ -24,7 +24,7 @@
             <tr>
               <td><%= @project.name %></td>
               <td class="ivc-check-all">
-                <%= hidden_field_tag "project_relation_types_all[#{@project.id}]", '0' %>
+                <%= hidden_field_tag "project_relation_types_all[#{@project.id}]", '0', id: nil %>
                 <%= check_box_tag "project_relation_types_all[#{@project.id}]",
                                   '1',
                                   all_relations,
@@ -34,7 +34,7 @@
                                     previous: selected_relation_types.join(",")
                                   } %>
               </td>
-              <%= hidden_field_tag "project_relation_types[#{@project.id}][]", '' %>
+              <%= hidden_field_tag "project_relation_types[#{@project.id}][]", '', id: nil %>
               <% additional_relation_type_keys.each do |relation_type| %>
                 <td class="ivc-project-<%= @project.id %>">
                   <%= check_box_tag "project_relation_types[#{@project.id}][]",
@@ -55,7 +55,7 @@
   </fieldset>
 
   <%= submit_tag t(:button_save) -%>
-  <%= submit_tag t(:button_cancel) -%>
+  <%= link_to l(:button_cancel), settings_project_path(@project, tab: 'issue_view_columns_relations') %>
 <% end %>
 
 <style>

@@ -29,6 +29,30 @@ class IssueViewColumnsProjectSettingsTest < Redmine::ControllerTest
       assert_select "#list-definition > div select#selected_c"
       assert_select "input[name=relations_limit]"
       assert_select "input[type=checkbox][name=relations_group_by_type]"
+      # the label must reach the checkbox, not the hidden "0" field before it
+      assert_select "#relations_group_by_type", 1
+      assert_select "input[type=checkbox]#relations_group_by_type"
+      # Cancel leaves without saving: a link, not a second submit button of this form
+      assert_select "input[type=submit][value=?]", I18n.t(:button_cancel), 0
+    end
+    assert_select "#tab-content-issue_view_columns a[href=?]", "/projects/#{@project.identifier}/settings/issue_view_columns",
+                  text: I18n.t(:button_cancel)
+  end
+
+  def test_relation_types_tab_saves_and_cancels_without_a_second_submit
+    with_extra_relation_type do
+      @request.session[:user_id] = 2
+
+      get :settings, params: { id: @project.identifier, tab: "issue_view_columns_relations" }
+
+      assert_response :success
+      assert_select "#tab-content-issue_view_columns_relations form[action=?]", "/issue_view_columns/relation_types" do
+        assert_select "input[type=checkbox][name=?][value=relates_custom]", "project_relation_types[#{@project.id}][]"
+        assert_select "#project_relation_types_all_#{@project.id}", 1
+        assert_select "input[type=submit][value=?]", I18n.t(:button_cancel), 0
+      end
+      assert_select "#tab-content-issue_view_columns_relations a[href=?]",
+                    "/projects/#{@project.identifier}/settings/issue_view_columns_relations", text: I18n.t(:button_cancel)
     end
   end
 
@@ -50,5 +74,23 @@ class IssueViewColumnsProjectSettingsTest < Redmine::ControllerTest
 
     assert_response :success
     assert_select "#tab-issue_view_columns", 0
+  end
+
+  private
+
+  def with_extra_relation_type
+    original_types = IssueRelation::TYPES
+    original_state = %i[@relates_like_types @registered_types @base_types].to_h do |ivar|
+      [ivar, RedmineIssueViewColumns::RelationTypes.instance_variable_get(ivar)]
+    end
+    RedmineIssueViewColumns::RelationTypes.register!(
+      { "relates_custom" => { name: :label_relates_to, sym_name: :label_relates_to, order: 9.9, sym: "relates_custom" } },
+      relates_like: %w[relates_custom]
+    )
+    yield
+  ensure
+    IssueRelation.send(:remove_const, :TYPES)
+    IssueRelation.const_set(:TYPES, original_types)
+    original_state.each { |ivar, value| RedmineIssueViewColumns::RelationTypes.instance_variable_set(ivar, value) }
   end
 end
