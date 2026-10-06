@@ -91,6 +91,25 @@ status = await postForm(t, `/issue_view_columns/relations?ids[]=${priv}&ids[]=${
 expect(t, status === 404 || status === 403, `outsider relating a private issue: HTTP ${status}`);
 console.log(`outsider POST relations with a private issue: HTTP ${status}`);
 
+// cross-project relations are off (core default): not offered, and a direct post creates nothing
 await t.login('admin');
+acceptDialogs(t);
+for (const r of await relatesAmong()) await api(t, 'DELETE', `/relations/${r.id}.json`);
+const other = await issueId(t, 'IVC no module related');
+await t.go(`/issues?set_filter=1&f[]=status_id&op[status_id]=*&f[]=issue_id&op[issue_id]==&v[issue_id][]=${ids.A},${ids.B},${other}&sort=id`);
+for (const id of [ids.A, ids.B, other]) await t.page.locator(`tr#issue-${id} td.checkbox input`).check();
+await t.page.locator(`tr#issue-${ids.A} td.status`).click({ button: 'right' });
+await t.page.waitForSelector('#context-menu ul', { timeout: 10000 }).catch(() => t.problems.push('context menu did not open'));
+expect(t, await t.page.locator('#context-menu a', { hasText: 'Related to' }).count() === 0,
+  'cross-project selection: "Related to" offered although cross-project relations are off');
+await t.shot('cross-project-hidden', 'Admin, issues of two projects, cross-project relations off: "Related to" is not offered', { full: false });
+status = await postForm(t, `/issue_view_columns/relations?ids[]=${ids.A}&ids[]=${ids.B}&ids[]=${other}&back_url=${encodeURIComponent(list)}`, {});
+await t.go(list);
+const flash = await t.page.locator('#flash_error').innerText().catch(() => '');
+expect(t, /No relation was created/.test(flash), `all-or-nothing: flash "${flash}"`);
+expect(t, (await relatesAmong()).length === 0, 'all-or-nothing: the valid pair A-B was created anyway');
+console.log(`admin POST relations A, B and a cross-project issue: HTTP ${status}, flash "${flash.trim()}"`);
+await t.shot('all-or-nothing', 'A direct post with one cross-project pair creates nothing and says so');
+
 for (const r of await relatesAmong()) await api(t, 'DELETE', `/relations/${r.id}.json`);
 await t.done();

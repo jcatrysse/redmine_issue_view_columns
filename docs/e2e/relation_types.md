@@ -1,6 +1,6 @@
 # relation_types
 
-Run 2026-10-06T19:48:06.328Z against http://127.0.0.1:3000.
+Run 2026-10-06T22:29:20.521Z against http://127.0.0.1:3000.
 
 | screenshot | user | URL | shows |
 |---|---|---|---|

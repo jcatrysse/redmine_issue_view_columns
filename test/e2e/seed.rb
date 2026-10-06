@@ -68,5 +68,12 @@ Setting.plugin_redmine_issue_view_columns = {
   'project_relation_types_all' => {}
 }
 
+# Redmine 6.1+: the global columns are core's (Administration > Settings > Issue tracking); headers on,
+# so the scenarios can read the column captions (global_defaults.mjs turns them off once)
+if Setting.available_settings.key?('related_issues_default_columns')
+  Setting.related_issues_default_columns = %w[status priority]
+  Setting.display_related_issues_table_headers = '1'
+end
+
 puts "IVC seed: parent ##{parent.id}, nomodule parent ##{np.id}, " \
      "extra relation types: #{(IssueRelation::TYPES.keys - %w[relates duplicates duplicated blocks blocked precedes follows copied_to copied_from]).join(', ')}"
