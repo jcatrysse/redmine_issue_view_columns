@@ -27,7 +27,15 @@ what is left. Written 2026-10-06 from a measured analysis (report at the bottom)
 
 ## Already on this branch
 
-- nothing: the branch equals the branch GEOxyz runs today.
+- Init: issue context menu helper registered on `ContextMenus::IssuesController` (Redmine 7.0) with
+  fallback to `ContextMenusController` (5.1/6.x); test `test/functional/issue_view_columns_context_menu_test.rb`.
+
+## Baseline (2026-10-06, before any change, Redmine 7.0.1 @ 7.0-stable-GEOxyz 8067e23, Ruby 3.3.6)
+
+- PostgreSQL 16: `rake db:create` fails at boot: `init.rb:33 uninitialized constant ContextMenusController
+  (NameError)`. No test, no server, no e2e possible on the unchanged branch.
+- With only the init.rb fix: minitest 13 runs, 32 assertions, 1 failure
+  (`test_create_requires_manage_relations_permission`, fixture-dependent, item 8), 0 errors.
 
 ## Work list for the migration session
 

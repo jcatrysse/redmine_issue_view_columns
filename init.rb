@@ -30,7 +30,14 @@ ProjectsController.send :helper, IssueViewColumnsHelper
 SettingsController.send :helper, IssueViewColumnsHelper
 IssuesController.send :helper, IssueViewColumnsIssuesHelper
 IssueRelationsController.send :helper, IssueViewColumnsIssuesHelper
-ContextMenusController.send :helper, IssueViewColumnsContextMenuHelper
+# Redmine 7.0 split ContextMenusController#issues into ContextMenus::IssuesController#index (#44169)
+issues_context_menu_controller =
+  begin
+    ContextMenus::IssuesController
+  rescue NameError
+    ContextMenusController
+  end
+issues_context_menu_controller.send :helper, IssueViewColumnsContextMenuHelper
 
 local_config = File.join(__dir__, "config", "redmine_issue_view_columns.local.rb")
 load local_config if File.exist?(local_config)
