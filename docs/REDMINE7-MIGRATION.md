@@ -16,69 +16,160 @@ what is left. Written 2026-10-06 from a measured analysis (report at the bottom)
 | | |
 |---|---|
 | Plugin id | `redmine_issue_view_columns` |
-| GEOxyz runs today | `2.0.0` |
+| GEOxyz runs today | `2.0.0` (plugin version 2.0.2) |
 | Upstream | siberianlove/redmine_issue_view_columns (master @ cf74e6c, 2024-11-10; keten kenan3008 -> san199332 -> siberianlove) |
-| Runs on Redmine 7 as is | NEE |
+| Runs on Redmine 7 as is | NEE (boot fails); **JA on this branch (2.1.0)** |
 | Upstream sync | UPSTREAM DOOD |
 | After sync | n.v.t. |
 | Complexity (1 trivial .. 5 rewrite) | 2 |
-| Measured on | Redmine 7.0.1 (7.0-stable-GEOxyz + latest 7.0-stable), Rails 8.1.3.1, Ruby 3.3.6, PostgreSQL 16 and MariaDB 10.11 |
-| Branch head when this file was written | `eebf15f` |
+| Measured on | Redmine 7.0.1 (7.0-stable-GEOxyz 8067e23), Rails 8.1.3.1, Ruby 3.3.6, PostgreSQL 16.15 and MariaDB 10.11.14; Redmine 5.1-stable with Ruby 3.2.11 on PostgreSQL |
+| Migration session | done 2026-10-06; every work list item done or decided below |
+
+## Results (2026-10-06)
+
+| check | PostgreSQL 16 | MariaDB 10.11 |
+|---|---|---|
+| boot, production eager load | OK | OK |
+| plugin migrations down to 0 and up again (test db) | OK | OK |
+| minitest, Redmine 7.0-stable-GEOxyz | 49 runs, 0 failures, with and without a local relation type config | 49 runs, 202 assertions, 0 failures, 5 random seeds, with and without the local config |
+| minitest, Redmine 5.1-stable (Ruby 3.2) | 49 runs, 155 assertions, 0 failures | not run |
+| e2e `./.codex/e2e.sh` (smoke + core + 9 scenarios) | 11 runs, 62 screenshots, 0 problems | 11 runs, 62 screenshots, 0 problems |
+| together with redmine_depending_custom_fields and redmine_itil_priority (both @redmine70-migration) | | minitest 49 runs 0 failures; e2e 11 runs, 62 screenshots, 0 problems |
+| OpenAI review (gpt-5) of 4cab08e..32231bf | "No findings." (`docs/reviews/openai-2026-10-06-32231bf.md`) | |
+
+Screenshots committed in `docs/e2e/` (Redmine 7, PostgreSQL; every one looked at). Before pictures in
+`docs/e2e/before/`: branch 2.0.0 on Redmine 5.1 (the scenarios fail there where the fixes apply), and
+`redmine70-2.0.2-related-issues.png` (2.0.2 on Redmine 7: "translation missing", limit ignored). The
+MariaDB, "together" and 5.1 runs of the new code wrote to a scratch directory; on 5.1 the scenarios
+stop at Redmine 7 markup (label "Delete relation", `input[type=button]` column buttons), the plugin
+itself works there.
 
 ## Already on this branch
 
-- Init: issue context menu helper registered on `ContextMenus::IssuesController` (Redmine 7.0) with
-  fallback to `ContextMenusController` (5.1/6.x); test `test/functional/issue_view_columns_context_menu_test.rb`.
+| commit | what |
+|---|---|
+| `fe69df1` | Redmine 7 boot: context menu helper on `ContextMenus::IssuesController`, fallback for 5.1/6.x |
+| `f6bdfad` | Security: `update` and `update_relation_types` were open to every logged-in user, also non-members of private projects (reproduced); now `authorize` with the existing permission |
+| `bd31145` | `label_relation_remove` (fallback `label_relation_delete` on 5.1) and `sprite_icon` icons |
+| `b2fad81` | fixture-dependent permission test made explicit (item 8); destroy refusal and 404 tests |
+| `f3c77d1` | the related issues limit only worked with grouping on (bug since 10ea101) |
+| `abf8817` | tests for the kept GEOxyz features |
+| `c8ad21c` | column selector layout on Redmine 6+ (`#list-definition`) |
+| `048221a`, `6689ecf` | tests independent of a local relation type config and of test order |
+| `2246dfd` | "Cancel" was a submit button and saved; hidden fields stole the checkbox id |
+| `2f0c9f0` | "Apply" on the plugin settings page erased every project's limit and grouping (also in production today) |
+| `cfceae9` | e2e scenarios, seed, screenshots |
+| `19682b7` | hard-coded English legend translated |
+| `32231bf` | 2.1.0, README, CHANGELOG, before screenshots |
 
 ## Baseline (2026-10-06, before any change, Redmine 7.0.1 @ 7.0-stable-GEOxyz 8067e23, Ruby 3.3.6)
 
 - PostgreSQL 16: `rake db:create` fails at boot: `init.rb:33 uninitialized constant ContextMenusController
   (NameError)`. No test, no server, no e2e possible on the unchanged branch.
 - With only the init.rb fix: minitest 13 runs, 32 assertions, 1 failure
-  (`test_create_requires_manage_relations_permission`, fixture-dependent, item 8), 0 errors.
+  (`test_create_requires_manage_relations_permission`, fixture-dependent, item 8), 0 errors;
+  smoke 12 pages and core flows 0 problems (no plugin columns configured, so core's tables).
+
+## Inventory of functions
+
+| function | how a user reaches it | scenario | screenshots (`docs/e2e/`) |
+|---|---|---|---|
+| Per-project columns, limit, grouping | Project > Settings > "Issue columns" (permission `manage_issue_view_columns`, module on) | `project_columns.mjs` | `project_columns-tab`, `-saved`, `-issue-new-column`, `-cancel`, `-reporter-refused`, `-module-off`, `-unchanged` |
+| Subtask and related issue tables with columns, remove icon | issue page | `issue_tables.mjs` | `issue_tables-manager`, `-remove-hover`, `-reporter`, `-outsider-public`, `-outsider-private` |
+| Related issues limit, "Show all / Show fewer" | issue page | `relations_limit.mjs` | `relations_limit-setting`, `-collapsed`, `-expanded`, `-collapsed-grouped`, `-reporter`, `-invalid-limit`, `-negative-blocked` |
+| Group related issues by relation type | issue page | `relations_grouping.mjs` | `relations_grouping-grouped`, `-reverse`, `-not-grouped` |
+| Global defaults (columns, limit, grouping) for projects without the module | Administration > Plugins > Configure (admin) | `global_defaults.mjs` | `global_defaults-settings`, `-defaults`, `-global-limit-grouped`, `-project-overrides`, `-manager-refused` |
+| Extra relation types (local config), per project in "Add relation" | project tab "Relation types", admin matrix, issue page | `relation_types.mjs` | `relation_types-default-dropdown`, `-tab`, `-added`, `-all`, `-matrix`, `-cleared`, `-reporter-refused` |
+| Context menu "Related to" (pairwise) and "Remove relation" | issue list, right click | `context_menu.mjs` | `context_menu-relate-three`, `-related`, `-nothing-missing`, `-remove-offered`, `-relate-again`, `-reporter` |
+| AJAX add/remove relation keeps the plugin table | issue page, "Add" / remove icon | `ajax_relations.mjs` | `ajax_relations-added`, `-removed`, `-invalid` |
+| REST API with extra relation types; unique index per type (migration 002) | `POST /issues/:id/relations.json` | `rest_api.mjs` | `rest_api-api-relations` |
+| Webhooks (Redmine 7) | core | `rails runner`, below | none |
+
+REST API (rest_api.mjs, basic auth): `relates_to_wiki` 201; `relates` next to it between the same
+issues 201; duplicate `relates_to_wiki` 422 "Relation Relates to Wiki to #13 already exists"; unknown
+type 422; reporter create 403; reporter read 200 with the relation; reporter delete 403; admin delete
+204. Direct POSTs: reporter and outsider to `/issue_view_columns`, `/issue_view_columns/relation_types`
+and `/issue_view_columns/relations` 403, reporter DELETE of a relation 403, anonymous 302 to login.
+
+Webhooks (item 10): `issue.webhook_payload(reporter, "updated")` carries no relations; a relation change
+appears as journal detail `{property: "relation", prop_key: <relation type>}`, extra types included. The
+plugin hides or alters no issue data, so nothing to make consistent.
 
 ## Work list for the migration session
 
-In this order: things that break, security, the GEOxyz changes, the open items, then the checks.
+All done on 2026-10-06; status per item in brackets.
 
-**Priority items**
+1. [done fe69df1] Commit the init.rb fix (ContextMenus::IssuesController with fallback).
+2. [done bd31145] label_relation_delete -> label_relation_remove; icons to sprite_icon.
+3. [decided, open question 1] What stays now that core 6.1 has configurable related-issue columns (#42477): everything stays; core's tables and setting apply when the plugin has no columns.
+4. [done fe69df1] same as item 1.
+5. [done bd31145] same as item 2.
+6. [done bd31145] same as item 2.
+7. [decided, open question 1] same as item 3.
+8. [done b2fad81] fixture-dependent permission test.
+9. [done] tests on 7.0-stable-GEOxyz with PostgreSQL and MariaDB, and on 5.1-stable (see Results).
+10. [done, nothing needed] webhooks (see Inventory).
+11. [done] every function in the browser, screenshots in docs/e2e.
 
-1. Commit the init.rb fix from the analysis (ContextMenus::IssuesController with fallback); without it Redmine 7 does not boot.
-2. label_relation_delete -> label_relation_remove; icons to sprite_icon.
-3. Decide what stays now that core 6.1 has configurable related-issue columns (#42477).
-
-**Open items from the analysis** (Dutch; where they conflict with a decision or a priority item above, those win)
-
-4. init.rb:33 ContextMenusController -> ContextMenus::IssuesController met fallback (getest in slot, niet gecommit: commit geweigerd door classifier)
-5. label_relation_delete bestaat niet in 7.0 -> label_relation_remove (helper:100,105, _context_menu.html.erb:15)
-6. icon-* CSS -> sprite_icon
-7. Globale kolom-setting vs core #42477 rationaliseren
-8. test_create_requires_manage_relations_permission is fixture-afhankelijk (Non member heeft manage_issue_relations)
-
-**Checks**
-
-9. Run the plugin's whole test suite on Redmine 7.0-stable-GEOxyz with PostgreSQL AND MariaDB, and once on 5.1-stable if the branch is meant to stay 5.1-compatible.
-10. Check Redmine 7 webhooks against this plugin (see "Rules"), and note the result here even if nothing is needed.
-11. Verify every feature of the plugin by hand on a running Redmine 7 (screenshots).
+Left as is on purpose: `label_unknown` (helper `relation_group_header`) exists in no locale, but that
+branch cannot be reached (`relation_type` is NOT NULL; a type no longer registered shows its key).
 
 ## GEOxyz changes to review or re-apply
 
-These GEOxyz commits are on the branch GEOxyz runs today and therefore on this branch. Review each one against the code it now sits on (upstream merges and Redmine 7 core): drop it if upstream or core now does the same, rewrite it if it is not up to the quality rules below (tests, I18n, security, portability), keep it otherwise. Record the verdict per commit in this file.
-
-| commit | date | subject |
-|---|---|---|
-| `605cc58` | 2026-01-30 | 2.0.2: add relation context menu |
-| `84f6c58` | 2026-01-08 | 2.0.1: filterable relations |
-| `10ea101` | 2025-12-26 | 2.0.0: configurable relations |
-| `f921c4d` | 2025-12-16 | Feature: added a configurable limit for related issues with an inline toggle to reveal or hide extra rows |
-| `0267fd0` | 2025-11-03 | Patch: code refactoring (autoloading related) |
-| `ca689ee` | 2025-06-17 | Defect: issue page does handle adding or destroying related issues correctly #5248 |
+| commit | date | subject | verdict |
+|---|---|---|---|
+| `605cc58` | 2026-01-30 | 2.0.2: add relation context menu | keep; Redmine 7 fixes fe69df1, bd31145; fixture dependence fixed b2fad81; cost with many issues: open question 3 |
+| `84f6c58` | 2026-01-08 | 2.0.1: filterable relations | keep; its controller action had no authorization (f6bdfad); tests abf8817; Cancel/ids 2246dfd |
+| `10ea101` | 2025-12-26 | 2.0.0: configurable relations | keep; it broke the limit without grouping (fixed f3c77d1); migration 002 down/up checked |
+| `f921c4d` | 2025-12-16 | related issues limit with toggle | keep; tests added; its per-project values were erased by plugin settings Apply (fixed 2f0c9f0) |
+| `0267fd0` | 2025-11-03 | autoloading refactoring | keep; required for Zeitwerk, nothing to change |
+| `ca689ee` | 2025-06-17 | AJAX add/remove related issues | keep; tests abf8817 and ajax_relations.mjs |
 
 ## After the upgrade (production)
 
 Actions the person doing the upgrade must take, or know about, for this plugin:
 
-- None known. Add here what the session finds.
+- `rake redmine:plugins:migrate` has nothing new to run (2.1.0 adds no migration).
+- Keep `config/redmine_issue_view_columns.local.rb` (and its locale file) when replacing the plugin
+  directory: the extra relation types are defined there.
+- The project tabs now really require "Manage issue view columns" (before 2.1.0 anybody could post the
+  forms). Check that the roles that should edit the columns have it.
+- Per-project limits and grouping that an earlier "Apply" on the plugin settings page erased are not
+  restored; set them again on the project tab where needed.
+- Rolling back migration 002 fails as soon as two relation types exist between the same two issues
+  (PostgreSQL rolls back cleanly; on MariaDB DDL is not transactional and the old index is then
+  missing). Remove those duplicates first if a rollback is ever needed.
+
+## Open questions for Jan
+
+1. **Core #42477 vs the plugin's global columns.** Built: nothing removed. The plugin's global default
+   columns apply to projects without the module; when the plugin has no columns for a project, core's
+   tables and core's setting (Administration > Settings > Issue tracking) apply. Options: (a) keep as
+   is (recommended, no change for users); (b) drop the plugin's global column setting and rely on core
+   for projects without the module (one setting less, but then the plugin's table, limit and grouping
+   only work in projects with the module).
+2. **Behaviour fixes users will notice** (all built, all were defects): the limit works without
+   grouping; Cancel no longer saves; plugin settings Apply keeps per-project values; the project tabs
+   need the permission. Recommendation: ship, mention in the release notes.
+3. **Context menu cost with many selected issues.** `relates_clique_available?` validates every pair on
+   each right click: 10 issues 107 ms / 116 queries, 25 issues 462 ms / 651 queries, 44 issues
+   1421 ms / 1981 queries (Redmine 7, MariaDB, production mode). Options: (a) leave it (built);
+   (b) offer "Related to" only up to N selected issues (e.g. 10); (c) skip the per-pair validation
+   above N and let the create action report errors. Recommendation: (b) with N = 10.
+4. **Subtask remove button.** Core (5.1 and 7) shows a "Remove subtask" icon in the subtask table; the
+   plugin's table never had it, so it is missing when plugin columns are configured. Recommendation: add
+   it in a follow-up (core label and permission `manage_subtasks`).
+
+## Findings outside this plugin
+
+- Core 7.0 `app/views/issue_relations/destroy.js.erb` replaces every `.issues-stat` on the page, so after
+  removing a relation the subtasks counter shows the related issues count (`docs/e2e/ajax_relations-invalid.png`:
+  "Subtasks 4" with 2 subtasks). Core bug, also without this plugin; candidate for 7.0-stable-GEOxyz.
+- Test kit: `.codex/test_setup.sh` with `RMP_PROVISION_DB=1` as root runs `$SUDO -u postgres psql` with
+  an empty `$SUDO` ("-u: command not found"); worked around (role created by hand, `RMP_PROVISION_DB=0`).
+  `redmine_clone.sh` needs `rsync` (installed). Redmine 5.1 needs Ruby < 3.3: installed with mise,
+  `RMP_RUBY=3.2`.
+- Not tested for lack of real services: nothing; the plugin sends no mail and calls no external service.
 
 ## How to test
 
