@@ -117,10 +117,10 @@ module IssueViewColumnsIssuesHelper
         buttons << link_to_context_menu if Redmine::VERSION::MAJOR >= 4
         field_content << content_tag('td', buttons, {class: 'buttons', style: 'text-align: right'}, false)
 
-        row_classes = grouped ? "#{css} ivc-relation-row" : css
+        # better_subtasks_table.js counts these rows for the "show more" limit, grouped or not
         s << content_tag("tr", field_content,
                          id: "relation-#{relation.id}",
-                         class: row_classes,
+                         class: "#{css} ivc-relation-row",
                          data: (grouped ? { relation_group: relation_type } : nil))
       end
     end
