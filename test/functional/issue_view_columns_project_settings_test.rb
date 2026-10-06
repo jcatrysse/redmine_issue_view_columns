@@ -1,6 +1,7 @@
 require File.expand_path("../test_helper", __dir__)
 
 class IssueViewColumnsProjectSettingsTest < Redmine::ControllerTest
+  include IssueViewColumnsRelationTypesState
   tests ProjectsController
 
   fixtures :projects, :users, :email_addresses, :roles, :members, :member_roles,
@@ -79,18 +80,13 @@ class IssueViewColumnsProjectSettingsTest < Redmine::ControllerTest
   private
 
   def with_extra_relation_type
-    original_types = IssueRelation::TYPES
-    original_state = %i[@relates_like_types @registered_types @base_types].to_h do |ivar|
-      [ivar, RedmineIssueViewColumns::RelationTypes.instance_variable_get(ivar)]
-    end
+    save_relation_types_state
     RedmineIssueViewColumns::RelationTypes.register!(
       { "relates_custom" => { name: :label_relates_to, sym_name: :label_relates_to, order: 9.9, sym: "relates_custom" } },
       relates_like: %w[relates_custom]
     )
     yield
   ensure
-    IssueRelation.send(:remove_const, :TYPES)
-    IssueRelation.const_set(:TYPES, original_types)
-    original_state.each { |ivar, value| RedmineIssueViewColumns::RelationTypes.instance_variable_set(ivar, value) }
+    restore_relation_types_state
   end
 end

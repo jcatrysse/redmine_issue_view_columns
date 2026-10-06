@@ -1,11 +1,10 @@
 require File.expand_path("../../test_helper", __dir__)
 
 class IssueRelationPatchTest < ActiveSupport::TestCase
+  include IssueViewColumnsRelationTypesState
+
   def setup
-    @original_types = IssueRelation::TYPES
-    RedmineIssueViewColumns::RelationTypes.instance_variable_set(:@relates_like_types, [])
-    RedmineIssueViewColumns::RelationTypes.instance_variable_set(:@registered_types, {})
-    RedmineIssueViewColumns::RelationTypes.instance_variable_set(:@base_types, @original_types)
+    @original_types = save_relation_types_state
     RedmineIssueViewColumns::RelationTypes.register!(
       {
         "relates_custom" => {
@@ -26,11 +25,7 @@ class IssueRelationPatchTest < ActiveSupport::TestCase
   end
 
   def teardown
-    IssueRelation.send(:remove_const, :TYPES)
-    IssueRelation.const_set(:TYPES, @original_types)
-    RedmineIssueViewColumns::RelationTypes.instance_variable_set(:@relates_like_types, [])
-    RedmineIssueViewColumns::RelationTypes.instance_variable_set(:@registered_types, {})
-    RedmineIssueViewColumns::RelationTypes.instance_variable_set(:@base_types, @original_types)
+    restore_relation_types_state
   end
 
   def test_circular_dependency_returns_false_when_ids_missing

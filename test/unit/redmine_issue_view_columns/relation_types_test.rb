@@ -1,19 +1,14 @@
 require File.expand_path("../../test_helper", __dir__)
 
 class RelationTypesTest < ActiveSupport::TestCase
+  include IssueViewColumnsRelationTypesState
+
   def setup
-    @original_types = IssueRelation::TYPES
-    RedmineIssueViewColumns::RelationTypes.instance_variable_set(:@relates_like_types, [])
-    RedmineIssueViewColumns::RelationTypes.instance_variable_set(:@registered_types, {})
-    RedmineIssueViewColumns::RelationTypes.instance_variable_set(:@base_types, @original_types)
+    @original_types = save_relation_types_state
   end
 
   def teardown
-    IssueRelation.send(:remove_const, :TYPES)
-    IssueRelation.const_set(:TYPES, @original_types)
-    RedmineIssueViewColumns::RelationTypes.instance_variable_set(:@relates_like_types, [])
-    RedmineIssueViewColumns::RelationTypes.instance_variable_set(:@registered_types, {})
-    RedmineIssueViewColumns::RelationTypes.instance_variable_set(:@base_types, @original_types)
+    restore_relation_types_state
   end
 
   def test_register_adds_types_and_relates_like

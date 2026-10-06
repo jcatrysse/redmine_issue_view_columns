@@ -4,7 +4,7 @@ require File.expand_path("../../test_helper", __dir__)
 class RelationTypeSettingsTest < ActiveSupport::TestCase
   fixtures :projects
 
-  RELATION_TYPES_STATE = %i[@relates_like_types @registered_types @base_types].freeze
+  include IssueViewColumnsRelationTypesState
 
   class HelperHost
     include Redmine::I18n
@@ -16,16 +16,8 @@ class RelationTypeSettingsTest < ActiveSupport::TestCase
   end
 
   def setup
-    @original_types = IssueRelation::TYPES
     @original_settings = Setting.plugin_redmine_issue_view_columns
-    # a config/redmine_issue_view_columns.local.rb may have registered types at boot: start from core's
-    @original_state = RELATION_TYPES_STATE.to_h { |ivar| [ivar, RedmineIssueViewColumns::RelationTypes.instance_variable_get(ivar)] }
-    core_types = @original_state[:@base_types] || @original_types
-    IssueRelation.send(:remove_const, :TYPES)
-    IssueRelation.const_set(:TYPES, core_types)
-    RedmineIssueViewColumns::RelationTypes.instance_variable_set(:@relates_like_types, [])
-    RedmineIssueViewColumns::RelationTypes.instance_variable_set(:@registered_types, {})
-    RedmineIssueViewColumns::RelationTypes.instance_variable_set(:@base_types, core_types)
+    save_relation_types_state
     RedmineIssueViewColumns::RelationTypes.register!(
       {
         "relates_business" => { name: :label_relates_to_business, sym_name: :label_relates_to_business,
@@ -40,9 +32,7 @@ class RelationTypeSettingsTest < ActiveSupport::TestCase
 
   def teardown
     Setting.plugin_redmine_issue_view_columns = @original_settings
-    IssueRelation.send(:remove_const, :TYPES)
-    IssueRelation.const_set(:TYPES, @original_types)
-    @original_state.each { |ivar, value| RedmineIssueViewColumns::RelationTypes.instance_variable_set(ivar, value) }
+    restore_relation_types_state
   end
 
   def test_extra_types_are_hidden_by_default
