@@ -42,7 +42,7 @@ class IssueViewColumnsIssuePageTest < Redmine::ControllerTest
   end
 
   def test_related_issues_table_has_no_remove_link_without_manage_relations
-    Role.anonymous.add_permission!(:view_issues)
+    allow_anonymous_to_view_issues
     Role.anonymous.remove_permission!(:manage_issue_relations)
 
     get :show, params: { id: @issue.id }
@@ -126,7 +126,7 @@ class IssueViewColumnsIssuePageTest < Redmine::ControllerTest
 
   def test_subtasks_table_has_no_remove_subtask_link_without_manage_subtasks
     Issue.generate!(project: @project, parent_issue_id: @issue.id)
-    Role.anonymous.add_permission!(:view_issues)
+    allow_anonymous_to_view_issues
     Role.anonymous.remove_permission!(:manage_subtasks)
 
     get :show, params: { id: @issue.id }
@@ -195,6 +195,12 @@ class IssueViewColumnsIssuePageTest < Redmine::ControllerTest
       IssueRelation.create!(issue_from: @issue, issue_to: Issue.generate!(project: @project),
                             relation_type: IssueRelation::TYPE_RELATES)
     end
+  end
+
+  # redmine_view_issue_description (a GEOxyz plugin) refuses the issue page without its permission
+  def allow_anonymous_to_view_issues
+    Role.anonymous.add_permission!(:view_issues)
+    Role.anonymous.add_permission!(:view_issue_description) if Redmine::Plugin.installed?(:redmine_view_issue_description)
   end
 
   def table_headers(on)

@@ -179,6 +179,15 @@ Actions the person doing the upgrade must take, or know about, for this plugin:
   an empty `$SUDO` ("-u: command not found"); worked around (role created by hand, `RMP_PROVISION_DB=0`).
   `redmine_clone.sh` needs `rsync` (installed). Redmine 5.1 needs Ruby < 3.3: installed with mise,
   `RMP_RUBY=3.2`.
+- Combined run of 2026-10-14 (44 GEOxyz plugins, Redmine 7.0-stable-GEOxyz 1d8c2a3, PostgreSQL 16): 2
+  failures in `IssueViewColumnsIssuePageTest` (403 for the anonymous "no remove link" tests), caused by
+  redmine_view_issue_description requiring `view_issue_description`; intended behaviour of that plugin.
+  Fixed in the tests: the anonymous role also gets `view_issue_description` when that plugin is
+  installed. Reproduced with only that plugin added: 2 failures before, 60 runs 0 failures after, and 60
+  runs 0 failures without it.
+- Harness finding H6 (shared .codex kit, not changed here): `start_server.sh` writes
+  `config/configuration.yml` with `email_delivery` under `default:`, which Redmine also applies to the
+  test environment; it should be written under `$RMP_SERVER_ENV`. To fix in the kit itself.
 - Not tested for lack of real services: nothing; the plugin sends no mail and calls no external service.
 
 ## How to test
