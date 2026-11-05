@@ -124,6 +124,31 @@ class IssueViewColumnsIssuePageTest < Redmine::ControllerTest
     end
   end
 
+  # Ruby 3.4+ warns when a string literal is mutated ("literal string will be frozen in the future"), Ruby 4.0 too
+  def test_tables_do_not_mutate_string_literals
+    Issue.generate!(project: @project, parent_issue_id: @issue.id)
+    allow_anonymous_to_view_issues
+    Role.anonymous.remove_permission!(:manage_subtasks)
+    Role.anonymous.remove_permission!(:manage_issue_relations)
+    warnings = []
+    collector = Module.new { define_method(:warn) { |message, *args, **opts| warnings << message.to_s; super(message, *args, **opts) } }
+    previous = Warning[:deprecated]
+    Warning.singleton_class.prepend(collector)
+    Warning[:deprecated] = true
+
+    begin
+      get :show, params: { id: @issue.id }
+    ensure
+      Warning[:deprecated] = previous
+    end
+
+    assert_response :success
+    assert_select "#issue_tree tr.issue"
+    assert_select "#relations tr.issue"
+    frozen = warnings.grep(/literal string will be frozen/).grep(/issue_view_columns/)
+    assert_empty frozen
+  end
+
   def test_subtasks_table_has_no_remove_subtask_link_without_manage_subtasks
     Issue.generate!(project: @project, parent_issue_id: @issue.id)
     allow_anonymous_to_view_issues

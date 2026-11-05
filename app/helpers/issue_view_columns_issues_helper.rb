@@ -9,7 +9,7 @@ module IssueViewColumnsIssuesHelper
     end
 
     # continue here if there are fields defined
-    field_values = ""
+    field_values = +""
     s = +'<table class="list issues odd-even">'
     headers = []
 
@@ -117,7 +117,7 @@ module IssueViewColumnsIssuesHelper
                                           method: :delete,
                                           data: { confirm: l(:text_are_you_sure) },
                                           title: ivc_relation_remove_label,
-                                          class: "icon-only icon-link-break") : ""
+                                          class: "icon-only icon-link-break") : +""
 
         field_content = content_tag("td", check_box_tag("ids[]", other_issue.id, false, id: nil), class: "checkbox") +
           content_tag("td", relation.to_s(@issue) { |other| link_to_issue(other, project: Setting.cross_project_issue_relations?) }.html_safe, class: "subject", style: "width: 30%; text-align:left")
